@@ -1,21 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ConsoleRPG_2023.RolePlayingGame.Items
 {
-    public enum ItemType
+    public enum ItemFilter
     {
         None = 0,
-
-        Consumable = 1,
-
-        Equipable_Body = 100,
-        Equipable_Head = 101,
-
-
-        Equipable_Weapon = 1000,
-
-
     }
 }

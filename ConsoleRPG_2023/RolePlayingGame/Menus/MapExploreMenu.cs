@@ -177,6 +177,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
 
             return options;
         }
+
         public override InputResult GetMenuInput()
         {
             //We surround the input with a try catch here because we can cancel the input which throws an exception to end the input stream.

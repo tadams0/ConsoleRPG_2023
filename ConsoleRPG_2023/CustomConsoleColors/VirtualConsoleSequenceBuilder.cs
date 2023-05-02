@@ -83,6 +83,22 @@ namespace CustomConsoleColors
         /// <summary>
         /// Swaps foreground and background colors
         /// </summary>
+        public static string Invert
+        {
+            get { return "\x1b[" + 7 + "m"; }
+        }
+
+        /// <summary>
+        /// Returns foreground/background to normal
+        /// </summary>
+        public static string Revert
+        {
+            get { return "\x1b[" + 27 + "m"; }
+        }
+
+        /// <summary>
+        /// Swaps foreground and background colors
+        /// </summary>
         public static string Negative
         {
             get { return "\x1b[" + 7 + "m"; }
@@ -440,5 +456,12 @@ namespace CustomConsoleColors
             return result;
         }
 
+        /// <summary>
+        /// Gets a specific ansi code with the given number.
+        /// </summary>
+        public static string GetAnsiCode(int index)
+        {
+             return "\x1b[" + index + "m";
+        }
     }
 }

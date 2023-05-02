@@ -329,10 +329,17 @@ namespace ConsoleRPG_2023.RolePlayingGame
             return writer.CountDisplaySize(formattedString);
         }
 
-        public static string FormatString(string text, Color color)
+        public static string FormatString(string text, Color foregroundColor)
         {
-            string colorTag = VirtualConsoleSequenceBuilder.GetColorForegroundSequence(color);
-            return colorTag + text;
+            string colorTag = VirtualConsoleSequenceBuilder.GetColorForegroundSequence(foregroundColor);
+            return colorTag + text + VirtualConsoleSequenceBuilder.Default;
+        }
+
+        public static string FormatString(string text, Color foregroundColor, Color backgroundColor)
+        {
+            string colorTag = VirtualConsoleSequenceBuilder.GetColorForegroundSequence(foregroundColor);
+            colorTag += VirtualConsoleSequenceBuilder.GetColorBackgroundSequence(backgroundColor);
+            return colorTag + text + VirtualConsoleSequenceBuilder.Default;
         }
 
         public static string FormatString(string text, ConsoleColor color)
@@ -442,6 +449,14 @@ namespace ConsoleRPG_2023.RolePlayingGame
             }
             return decimalPlaces;
             */
+        }
+
+        public static Color GetRandomColor(Random r)
+        {
+            byte red = (byte)r.Next(0, 256);
+            byte green = (byte)r.Next(0, 256);
+            byte blue = (byte)r.Next(0, 256);
+            return Color.FromArgb(red, green, blue);
         }
 
     }

@@ -16,6 +16,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             options.AddOption("Load Game", 2, x => LoadGame(x));
             options.AddOption("Settings", 3, x => Settings(x));
             options.AddOption("Exit", 4, x => Exit(x));
+            options.AddOption("TEST Inventory Menu", 5, x => InventoryMenuTest(x));
 
             return options;
         }
@@ -55,6 +56,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
         {
             MenuResult result = new MenuResult();
             result.Action = Helper.ActionExit;
+            return result;
+        }
+        private MenuResult InventoryMenuTest(InputResult input)
+        {
+            MenuResult result = new MenuResult();
+            result.Action = "InventoryMenu";
             return result;
         }
 

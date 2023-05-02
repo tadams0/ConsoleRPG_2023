@@ -136,9 +136,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
         {
             MapChunk newChunk = chunk;
             int downBias = 20;
-            int rightBias = 40;
-            int leftBias = 40;
-            int upBias = 50;
+            int rightBias = 20;
+            int leftBias = 0;
+            int upBias = 0;
 
             bool reachedEnd = false;
             int currentX = startingX;
@@ -153,31 +153,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
 
                 newChunk.SetTileRelative(currentX, currentY, room);
 
-                int chunkDirection = rand.Next(0, 101);
-                if (chunkDirection < downBias)
-                {
-                    //Create downward Cell
-
-                    currentY += 1;
-                }
-                else if (chunkDirection < downBias + rightBias)
-                {
-                    //Create rightward cell
-
-                    currentX += 1;
-                }
-                else if (chunkDirection < downBias + rightBias + leftBias)
-                {
-                    //Create leftward cell
-
-                    currentX -= 1;
-                }
-                else if (chunkDirection < downBias + rightBias + leftBias + upBias)
-                {
-                    //Create upward cell
-
-                    currentY -= 1;
-                }
+                Point directionVector = ChooseDirection(upBias, rightBias, downBias, leftBias);
+                currentX += directionVector.X;
+                currentY += directionVector.Y;
 
                 reachedEnd = newChunk.IsOutOfBounds(currentX, currentY);
 
@@ -188,63 +166,39 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
             }
         }
 
-
-        private MapChunk GenerateChunk(long id, int chunkWidth, int chunkHeight, int chunkX, int chunkY, int startingX, int startingY, out Point end)
+        public static Point ChooseDirection(double north, double east, double south, double west)
         {
-            MapChunk newChunk = new MapChunk(id, chunkX, chunkY, chunkWidth, chunkHeight);
-            int downBias = 40;
-            int rightBias = 40;
-            int leftBias = 40;
-            int upBias = 50;
-
-            bool reachedEnd = false;
-            int currentX = startingX;
-            int currentY = startingY;
-
-            end = Point.Empty;
-
-            while (!reachedEnd)
+            var directions = new List<KeyValuePair<Point, double>>()
             {
-                byte newTileId = newChunk.GetTileId(currentX, currentY);
-                Tile room = GenerateTile(newTileId);
+                new KeyValuePair<Point, double>(new Point(0, -1), north),
+                new KeyValuePair<Point, double>(new Point(1, 0), east),
+                new KeyValuePair<Point, double>(new Point(0, 1), south),
+                new KeyValuePair<Point, double>(new Point(-1, 0), west)
+            };
 
-                newChunk.SetTileRelative(currentX, currentY, room);
+            double total = directions.Sum(x => x.Value);
+            double randomValue = rand.NextDouble() * total;
 
-                int chunkDirection = rand.Next(0, 101);
-                if (chunkDirection < downBias)
-                {
-                    //Create downward Cell
-
-                    currentY += 1;
-                }
-                else if (chunkDirection < downBias + rightBias)
-                {
-                    //Create rightward cell
-
-                    currentX += 1;
-                }
-                else if (chunkDirection < downBias + rightBias + leftBias)
-                {
-                    //Create leftward cell
-
-                    currentX -= 1;
-                }
-                else if (chunkDirection < downBias + rightBias + leftBias + upBias)
-                {
-                    //Create upward cell
-
-                    currentY -= 1;
-                }
-
-                reachedEnd = newChunk.IsOutOfBounds(currentX, currentY);
-
-                if (reachedEnd)
-                {
-                    end = new Point(currentX,currentY);
-                }
+            // Shuffle the directions array
+            for (int i = 0; i < directions.Count - 1; i++)
+            {
+                int j = rand.Next(i, directions.Count);
+                var temp = directions[i];
+                directions[i] = directions[j];
+                directions[j] = temp;
             }
 
-            return newChunk;
+            // Choose a direction based on shuffled probabilities
+            foreach (var kvp in directions)
+            {
+                if (randomValue < kvp.Value)
+                {
+                    return kvp.Key;
+                }
+                randomValue -= kvp.Value;
+            }
+
+            return new Point(0, 0); //this code should not be reached
         }
 
         public Tile GenerateTile(byte id)
