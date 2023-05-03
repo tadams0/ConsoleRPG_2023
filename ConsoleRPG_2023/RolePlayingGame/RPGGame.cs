@@ -123,8 +123,8 @@ namespace ConsoleRPG_2023.RolePlayingGame
                     Helper.WriteFormattedString(lastMenuResult.CustomMessage);
                 }
 
-                //If no display was used, then the user cannot reliable navigate the menu so gathering the input will be skipped and the menu can handle it all in its update method.
-                if (displayUsed != null)
+                //Only skip the menu input if the menu calls for it.
+                if (!currentMenu.SkipMenuInput)
                 {
                     //Get the menu input
                     lastInput = currentMenu.GetMenuInput();

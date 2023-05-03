@@ -41,16 +41,14 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             int lineSeperatorLength = LineSeperator.Length;
             LineSeperator = new string('~', lineSeperatorLength);
 
-            detailedAreaViewTimer = new Timer(msBeforeDetailedView);
-            detailedAreaViewTimer.AutoReset = false;
-            detailedAreaViewTimer.Elapsed += DetailedAreaViewTimer_Elapsed;
+            this.writeOptions = false;
         }
 
         private void DetailedAreaViewTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (detailedMode)
                 return;
-            
+
             ConsoleExtensions.CancelInput();
         }
 
@@ -61,6 +59,10 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             map = GameState.WorldMap;
             mapRenderer = GameState.MapRenderer;
             player = GameState.PlayerCharacter;
+
+            detailedAreaViewTimer = new Timer(msBeforeDetailedView);
+            detailedAreaViewTimer.AutoReset = false;
+            detailedAreaViewTimer.Elapsed += DetailedAreaViewTimer_Elapsed;
 
             //TEST:
             //TODO: Look into the map cap, it should be much higher (Probably due to an inproper key in a dictionary or float precision or broken point normalization)
@@ -247,6 +249,18 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
                 map.MoveObject(player, 1, 0);
                 OnPlayerAction();
                 OnPlayerMove();
+            }
+            else if (input.Key.Key == ConsoleKey.E 
+                || input.Key.Key == ConsoleKey.I)
+            {
+                detailedMode = true;
+                result.Payload = player.Inventory;
+                result.Action = "InventoryMenu";
+            }
+            else if (input.Key.Key == ConsoleKey.Escape)
+            {
+                detailedMode = true;
+                result.Action = "PauseMenu";
             }
 
             else if (detailedMode && objectCount > 0)

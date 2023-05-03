@@ -23,6 +23,15 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             set { customMessageAppearsBelow = value; }
         }
 
+        /// <summary>
+        /// If true then the main game loop will skip calling this menu's <see cref="GetMenuInput"/> method.
+        /// <br/>If false, the method will be called normally.
+        /// </summary>
+        public bool SkipMenuInput
+        { 
+            get { return skipMenuInput; } 
+        }
+
         public string LineSeperator
         {
             get { return lineSeparator; }
@@ -72,6 +81,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
         /// If true, then the options display will be written to screen. If false, it will not.
         /// </summary>
         protected bool writeOptions = true;
+
+        /// <summary>
+        /// If true then the main game loop will skip calling this menu's <see cref="GetMenuInput"/> method.
+        /// <br/>If false, the method will be called normally.
+        /// </summary>
+        protected bool skipMenuInput = false;
 
         /// <summary>
         /// The default action to use if no update override is applied or no option corresponds.

@@ -29,7 +29,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
         {
             base.OnSetGameState();
 
-
+            /*
             viewingContainer = new Container();
 
             for (int i = 0; i < 250; i++)
@@ -66,10 +66,23 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
                     viewingContainer.AddItem(item);
                 }
             }
+            */
 
             renderer = new GridRenderer(Console.WindowWidth);
-            renderer.SetFilter(x=>x.OrderByDescending(y=>((Item)y).Name).ToList());
-            PopulateRendererWithContainer(viewingContainer);
+            //renderer.SetFilter(x=>x.OrderByDescending(y=>((Item)y).Name).ToList());
+            //PopulateRendererWithContainer(viewingContainer);
+        }
+
+        protected override void OnSetPayload()
+        {
+            base.OnSetPayload();
+
+            Container container = (Container)lastPayload;
+            if (container != null)
+            {
+                viewingContainer = container;
+                PopulateRendererWithContainer(container);
+            }
         }
 
         private void PopulateRendererWithContainer(Container c)
@@ -173,6 +186,10 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
                 {
                     selectedIndex = expectedIndex;
                 }
+            }
+            else if (input.Key.Key == ConsoleKey.Escape)
+            {
+                result.Action = Helper.ActionBackOrReturn;
             }
 
             if (input.Key.Key == ConsoleKey.Enter)

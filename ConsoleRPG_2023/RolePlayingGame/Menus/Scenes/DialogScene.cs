@@ -16,6 +16,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus.Scenes
         {
             writeEmptyMessage = false;
             writeOptions = false;
+            skipMenuInput = true;
         }
 
         public override InputResult GetMenuInput()

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ConsoleRPG_2023.RolePlayingGame.Menus
 {
-    internal class MainMenu : Menu
+    internal class PauseMenu : Menu
     {
 
         protected override OptionDisplay CreateOptions()
@@ -12,10 +12,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             OptionDisplay options = base.CreateOptions();
 
 
-            options.AddOption("New Game", 1, x => NewGame(x));
+            options.AddOption("Save Game", 1, x => SaveGame(x));
             options.AddOption("Load Game", 2, x => LoadGame(x));
             options.AddOption("Settings", 3, x => Settings(x));
-            options.AddOption("Exit", 4, x => Exit(x));
+            options.AddOption("Controls", 4, x => ControlsMenu(x));
+            options.AddOption("Continue", 5, x => Return(x));
 
             return options;
         }
@@ -44,17 +45,30 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             //TODO
             return result;
         }
+        private MenuResult SaveGame(InputResult input)
+        {
+            MenuResult result = new MenuResult();
+            //TODO
+            return result;
+        }
 
         private MenuResult Settings(InputResult input)
         {
             MenuResult result = new MenuResult("GameSettingsMenu");
             return result;
         }
-
-        private MenuResult Exit(InputResult input)
+        private MenuResult ControlsMenu(InputResult input)
         {
             MenuResult result = new MenuResult();
-            result.Action = Helper.ActionExit;
+            //TODO
+            return result;
+        }
+
+
+        private MenuResult Return(InputResult input)
+        {
+            MenuResult result = new MenuResult();
+            result.Action = Helper.ActionBackOrReturn;
             return result;
         }
 

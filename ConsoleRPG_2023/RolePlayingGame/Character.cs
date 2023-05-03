@@ -1,4 +1,5 @@
-﻿using ConsoleRPG_2023.RolePlayingGame.Maps;
+﻿using ConsoleRPG_2023.RolePlayingGame.Items;
+using ConsoleRPG_2023.RolePlayingGame.Maps;
 using CustomConsoleColors;
 using System;
 using System.Collections.Generic;
@@ -34,9 +35,17 @@ namespace ConsoleRPG_2023.RolePlayingGame
 
         public bool IsPlayer { get; }
 
+        public Container Inventory
+        {
+            get { return inventory; }
+        }
+
+        private Container inventory;
+
         public Character(bool isPlayer = false) 
         { 
             IsPlayer = isPlayer;
+            inventory = new Container();
         }
 
         public override string ToString()
