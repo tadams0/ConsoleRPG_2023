@@ -28,7 +28,7 @@ namespace ConsoleRPG_2023.RolePlayingGame
         /// <summary>
         /// Gets or sets the default map rendering height in characters.
         /// </summary>
-        public int MapViewHeight { get; set; } = (int)(Console.WindowHeight * 0.9);
+        public int MapViewHeight { get; set; } = (int)(Console.WindowHeight * 0.5);
 
         /// <summary>
         /// Gets or sets the default map rendering width in characters (Monospaced).

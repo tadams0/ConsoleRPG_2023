@@ -199,7 +199,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// <param name="x">The world space x coordinate.</param>
         /// <param name="y">The world space y coordinate.</param>
         /// <param name="tile">The tile to set to the given position.</param>
-        public void SetTileByWorldCoordinates(int x, int y, Tile tile)
+        public void SetTileByWorldCoordinates(long x, long y, Tile tile)
         {
             byte id = GetTileIdFromWorldCoordinates(x, y);
             tiles[id] = tile;
@@ -252,13 +252,13 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             int localTileX = Math.Abs((int)(x % width));
             if (x < 0)
             {//Flip x
-                //width - 1 = 15 (if width is 16). Because 0 is a value, 15 is the highest value possible.
-                localTileX = (width - 1) - localTileX;
+                //When negative, -1 is the minimum value, -16 is the highest value possible (in world coordinates).
+                localTileX = width - localTileX;
             }
             int localTileY = Math.Abs((int)(y % height));
             if (y < 0)
             {//Flip y
-                localTileY = (height - 1) - localTileY;
+                localTileY = height - localTileY;
             }
             return GetTileRelativeCoordinates(localTileX, localTileY);
         }

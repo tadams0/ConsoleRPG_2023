@@ -32,6 +32,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         GrassTall = 44,
         IcyGrassMild = 45,
         GrassVibrant = 46,
+        GrassWithered = 47,
 
         Mud = 55,
 

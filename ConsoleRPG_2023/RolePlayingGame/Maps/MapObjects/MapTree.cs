@@ -24,9 +24,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             return enumValue + " Tree";
         }
 
-        public override MapObjectInteractionResult Interact(Map map)
+        public override MapObjectInteractionResult Interact(Map map, Character character)
         {
-            var result = base.Interact(map);
+            var result = base.Interact(map, character);
 
             result.InteractionMessage = $"Yup that's definitely a {this.ToString()}";
 

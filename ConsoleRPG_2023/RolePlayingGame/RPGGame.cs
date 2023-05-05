@@ -55,6 +55,9 @@ namespace ConsoleRPG_2023.RolePlayingGame
             state = new GameState();
             InitializeGameState(state);
 
+            //Load game data.
+            GameLoader.Load(state);
+            
             /*
             Console.Write("This");
             string s = Helper.FormatString("This", ConsoleColor.Red, ConsoleColor.White, 1000,50,1000);

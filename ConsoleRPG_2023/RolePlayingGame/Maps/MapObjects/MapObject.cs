@@ -27,10 +27,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// Interacts with the object.
         /// </summary>
         /// <param name="map">The map that this object is tied to.</param>
-        /// <returns>The action taht the map object wants to execute.</returns>
-        public virtual MapObjectInteractionResult Interact(Map map)
+        /// <param name="character">The character, if any that triggered the interaction. Can be null if no character did the interaction.</param>
+        /// <returns>The action that the map object wants to execute.</returns>
+        public virtual MapObjectInteractionResult Interact(Map map, Character character)
         {
-            MapObjectInteractionResult defaultResult = new MapObjectInteractionResult(map, this);
+            MapObjectInteractionResult defaultResult = new MapObjectInteractionResult(map, this, character);
             defaultResult.InteractionMessage = "Nothing happens.";
             return defaultResult;
         }

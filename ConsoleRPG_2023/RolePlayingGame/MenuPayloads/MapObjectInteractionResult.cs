@@ -35,6 +35,10 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps.MapObjects
             set { interactionMessage = value; }
         }
 
+        /// <summary>
+        /// The character interacting with the map object. Null if no character was interacting with it.
+        /// </summary>
+        public Character Character { get; set; }
 
         private MapObject mapObject;
         private Map map;
@@ -43,10 +47,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps.MapObjects
 
         private string interactionMessage = string.Empty;
 
-        public MapObjectInteractionResult(Map map, MapObject mapObject)
+        public MapObjectInteractionResult(Map map, MapObject mapObject, Character character)
         {
             this.map = map;
             this.mapObject = mapObject;
+            Character = character;
         }
 
     }

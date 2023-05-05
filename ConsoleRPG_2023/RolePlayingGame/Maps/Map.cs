@@ -47,7 +47,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// The total maximum number of chunks, in one direction from 0,0.
         /// <br/> This is by default int.MaxValue * 32 or 1,099,511,627,264 chunks.
         /// </summary>
-        protected long maximumNumberOfChunks = int.MaxValue * 32L;
+        //protected long maximumNumberOfChunks = int.MaxValue * 32L;
+        protected long maximumNumberOfChunks = 200;
 
         protected Dictionary<long, MapChunk> mapChunkMapping = new Dictionary<long, MapChunk>();
 
@@ -74,7 +75,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// <returns></returns>
         public long GetChunkIdInChunkSpace(int x, int y)
         {
-            return (long)x * maximumNumberOfChunks + y;
+            //return (long)x * maximumNumberOfChunks + y;
+            return (long)y * maximumNumberOfChunks + x;
         }
 
         /// <summary>
@@ -83,17 +85,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// </summary>
         public Point GetLocalChunkSpaceFromWorldSpace(long x, long y)
         {
-            if (x < 0)
-            {
-                x -= chunkWidth;
-            }
-            if (y < 0)
-            {
-                y -= chunkHeight;
-            }
-
-            int localChunkX = (int)(x / chunkWidth);
-            int localChunkY = (int)(y / chunkHeight);
+            int localChunkX = (int)Math.Floor((decimal)x / chunkWidth);
+            int localChunkY = (int)Math.Floor((decimal)y / chunkHeight);
 
             return new Point(localChunkX, localChunkY);
         }
@@ -103,17 +96,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// </summary>
         public long GetChunkIdFromWorldSpace(long x, long y)
         {
-            if (x < 0)
-            {
-                x -= chunkWidth;
-            }
-            if (y < 0)
-            {
-                y -= chunkHeight;
-            }
-
-            int localChunkX = (int)(x / chunkWidth);
-            int localChunkY = (int)(y / chunkHeight);
+            int localChunkX = (int)Math.Floor((decimal)x / chunkWidth);
+            int localChunkY = (int)Math.Floor((decimal)y / chunkHeight);
 
             return GetChunkIdInChunkSpace(localChunkX, localChunkY);
         }

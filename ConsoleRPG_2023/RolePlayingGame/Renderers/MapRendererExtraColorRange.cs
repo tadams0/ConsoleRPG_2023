@@ -34,6 +34,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Renderers
             AddNewTileTypeColorMapping(TileType.GrassSparse, Color.FromArgb(150, 180, 80));
             AddNewTileTypeColorMapping(TileType.GrassMild, Color.FromArgb(62, 200, 12));
             AddNewTileTypeColorMapping(TileType.GrassVibrant, Color.FromArgb(130, 255, 77));
+            AddNewTileTypeColorMapping(TileType.GrassWithered, Color.FromArgb(150, 200, 12));
             AddNewTileTypeColorMapping(TileType.Mud, Color.FromArgb(148, 192, 15));
             AddNewTileTypeColorMapping(TileType.MountainRock, Color.FromArgb(125, 125, 130));
             AddNewTileTypeColorMapping(TileType.FineSand, Color.FromArgb(232, 207, 130));
@@ -47,7 +48,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Renderers
             AddNewTileTypeColorMapping(TileType.CorruptedSand, Color.FromArgb(176, 42, 165));
             AddNewTileTypeColorMapping(TileType.Stone, Color.FromArgb(105, 105, 110));
             AddNewTileTypeColorMapping(TileType.CarvedStone, Color.FromArgb(145, 145, 145));
-
+            
 
             AddNewTileTypeColorMapping(TileType.None, Color.Black);
 
@@ -135,7 +136,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Renderers
                         tileObjects = currentChunk.GetAllObjectsAtWorldCoordinates(i, j);
                         if (tileObjects != null && tileObjects.Count > 0)
                         {
-                            lastTileObject = tileObjects.Last();
+                            lastTileObject = this.GetPriorityObject(tileObjects);
 
                             MapObjectRenderer renderer = GetRenderer(lastTileObject);
                             currentForegroundColor = renderer.GetForegroundColor(lastTileObject, currentTile, gameState);

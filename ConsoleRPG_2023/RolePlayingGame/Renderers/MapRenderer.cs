@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using ConsoleRPG_2023.RolePlayingGame.Maps;
+using ConsoleRPG_2023.RolePlayingGame.Maps.MapObjects;
 using ConsoleRPG_2023.RolePlayingGame.Menus;
 
 namespace ConsoleRPG_2023.RolePlayingGame.Renderers
@@ -264,6 +266,32 @@ namespace ConsoleRPG_2023.RolePlayingGame.Renderers
         protected ConsoleColor TileTypeToColor(TileType tileType)
         {
             return tileColorMapping[tileType];
+        }
+
+        /// <summary>
+        /// Gets the object which has highest priority for display from the given list of map objects.
+        /// </summary>
+        /// <param name="objects">List of map objects to return the highest priority from.</param>
+        protected virtual MapObject GetPriorityObject(List<MapObject> objects)
+        {
+            return objects.OrderBy(MapObjectOrder).First();
+        }
+
+        /// <summary>
+        /// Determines the order in which map objects are sorted.
+        /// </summary>
+        protected int MapObjectOrder(MapObject obj)
+        {
+            if (obj is Character)
+                return 1;
+            else if (obj is MapDungeonObj)
+                return 2;
+            else if (obj is MapContainer)
+                return 3;
+            else if (obj is MapItem)
+                return 4;
+            else
+                return 5;
         }
 
     }

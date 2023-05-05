@@ -11,6 +11,13 @@ namespace ConsoleRPG_2023.RolePlayingGame.Items
     /// </summary>
     public class Container
     {
+        /// <summary>
+        /// Gets the number of items within the container.
+        /// </summary>
+        public int Count
+        {
+            get { return items.Count; }
+        }
 
         private List<Item> items = new List<Item>();
 
@@ -21,6 +28,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Items
 
         public void AddItem(Item item)
         {
+            if (item == null)
+            {
+                int test = 0;
+                test++;
+            }
             items.Add(item);
         }
 
@@ -30,9 +42,19 @@ namespace ConsoleRPG_2023.RolePlayingGame.Items
             return result;
         }
 
+        public void AddRange(IEnumerable<Item> newItems)
+        {
+            items.AddRange(newItems);
+        }
+
         public List<Item> GetItems()
         {
             return new List<Item>(items);
+        }
+
+        public void Clear()
+        {
+            items.Clear();
         }
 
 

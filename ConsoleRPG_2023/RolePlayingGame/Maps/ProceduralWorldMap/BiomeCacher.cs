@@ -45,19 +45,27 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                     return TileType.Water;
                 }
                 int rand = random.Next(0, 100);
-                int rand2 = random.Next(485, 505);
+                int rand2 = random.Next(505, 515);
+                int witherThreshold = random.Next(317, 323);
                 if (x.Height > rand2)
                 {
-                    if (rand < Math.Min(95,x.Height - 480))
+                    if (rand < Math.Min(95,(x.Height - 500) / 2))
                     {
                         return TileType.MountainRock;
                     }
                     rand = random.Next(0, 100);
                     if (rand < 70 || x.Fertility > 60)
                     {
-                        return TileType.GrassMild;
+                        if (x.Temperature > witherThreshold)
+                        {//hot
+                            return TileType.GrassWithered;
+                        }
+                        else
+                        {
+                            return TileType.GrassMild;
+                        }
                     }
-                    else if (rand < 95)
+                    else if (x.Temperature < witherThreshold && rand < 95)
                     {
                         return TileType.GrassTall;
                     }
@@ -66,13 +74,28 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                         return TileType.GrassSparse;
                     }
                 }
-                if (rand < 70)
+
+                if (x.Temperature > witherThreshold)
                 {
-                    return TileType.GrassMild;
+                    if (rand < 70)
+                    {
+                        return TileType.GrassWithered;
+                    }
+                    else
+                    {
+                        return TileType.GrassSparse;
+                    }
                 }
                 else
                 {
-                    return TileType.GrassTall;
+                    if (rand < 70)
+                    {
+                        return TileType.GrassMild;
+                    }
+                    else
+                    {
+                        return TileType.GrassTall;
+                    }
                 }
             });
 
@@ -90,14 +113,14 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             newBiome = new Biome(biomeType);
             newBiome.AllowAnyTileTypeBlending = false;
             newBiome.AddTileTypeForBlending(TileType.Ice);
-            newBiome.AddTileType(0, x => x.Height > 200 ? TileType.Beach : TileType.None);
+            newBiome.AddTileType(0, (x) => x.Height > 200 ? TileType.Beach : TileType.None);
             newBiome.AddTileType(1, x => x.Temperature < 270 ? TileType.Ice : TileType.None);
             newBiome.AddTileType(2, x => TileType.Water);
             biomes[biomeType] = newBiome;
 
             biomeType = BiomeType.Woodland;
             newBiome = new Biome(biomeType);
-            newBiome.AddTileType(0, x => TileType.GrassTall);
+            newBiome.AddTileType(0, x => x.Temperature < random.Next(317, 323) ? TileType.GrassTall : TileType.GrassWithered);
             newBiome.AddObjectInitSingleTileFunction(0, (biomeData, tile) => random.Next(0, 100) < 10 ? new MapTree(TreeType.Cedar) : null);
             newBiome.AddObjectInitSingleTileFunction(1, (biomeData, tile) => random.Next(0, 100) < 4 ? new MapTree(TreeType.Oak) : null);
             newBiome.AddObjectInitSingleTileFunction(2, (biomeData, tile) => random.Next(0, 100) < 6 ? new MapTree(TreeType.Birch) : null);
@@ -105,7 +128,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
             biomeType = BiomeType.Forest;
             newBiome = new Biome(biomeType);
-            newBiome.AddTileType(0, x => TileType.GrassThick);
+            newBiome.AddTileType(0, x => x.Temperature < random.Next(337, 343) ? TileType.GrassThick : TileType.GrassWithered);
             newBiome.AddObjectInitSingleTileFunction(0, (biomeData, tile) => random.Next(0, 100) < 20 ? new MapTree(TreeType.Cedar) : null);
             newBiome.AddObjectInitSingleTileFunction(1, (biomeData, tile) => random.Next(0, 100) < 15 ? new MapTree(TreeType.Oak) : null);
             newBiome.AddObjectInitSingleTileFunction(2, (biomeData, tile) => random.Next(0, 100) < 15 ? new MapTree(TreeType.Fir) : null);

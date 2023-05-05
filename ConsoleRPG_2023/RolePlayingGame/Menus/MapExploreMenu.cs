@@ -1,11 +1,14 @@
 ﻿using ConsoleRPG_2023.RolePlayingGame.Dungeons;
+using ConsoleRPG_2023.RolePlayingGame.Items;
 using ConsoleRPG_2023.RolePlayingGame.Maps;
 using ConsoleRPG_2023.RolePlayingGame.Maps.MapObjects;
+using ConsoleRPG_2023.RolePlayingGame.MenuPayloads;
 using ConsoleRPG_2023.RolePlayingGame.Renderers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Timers;
 
@@ -26,8 +29,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
 
         private bool detailedMode = false;
 
-        private bool debugMode = false;
-        private bool showPlayerCoordinates = false;
+        private bool debugMode = true;
+        private bool showPlayerCoordinates = true;
 
         /// <summary>
         /// Number of objects the player is currently ontop.
@@ -76,14 +79,57 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             chunk.AddMapObject(player);
 
             //TEST ONLY:
-            DungeonMap testDungeon = new DungeonMap(11, 11);
+            DungeonMap testDungeon = new DungeonMap(111, 111);
             long id = map.AddDungeon(testDungeon, 0, 0);
 
             MapDungeonObj dungeonMarker = new MapDungeonObj(id);
             dungeonMarker.Name = testDungeon.Name;
 
             chunk.AddMapObject(0, 0, dungeonMarker);
+
+            Item coifOfTesting = new Item();
+            coifOfTesting.Name = "Coif of Testing";
+            coifOfTesting.ItemType = ItemUseType.Equippable;
+            coifOfTesting.Description = "A coif used during testing to see how object and item interaction works within a map.";
+            coifOfTesting.Category = ItemCategoryType.HeadArmor;
+            coifOfTesting.Noun = "coif";
+            MapItem itemMarker1 = new MapItem(coifOfTesting);
+            itemMarker1.LocationDescription = "within the mud on the ground";
+            chunk.AddMapObject(itemMarker1);
+
+            Consumable healthPotion = new Consumable();
+            healthPotion.Name = "Standard Healing Potion";
+            healthPotion.ItemType = ItemUseType.Consumable;
+            healthPotion.ActionVerb = "drink";
+            healthPotion.Description = "A simple healing potion.";
+            healthPotion.Category = ItemCategoryType.Potion;
+            healthPotion.Noun = "potion";
+            MapItem itemMarker2 = new MapItem(healthPotion);
+            itemMarker2.LocationDescription = "cleanly sitting on the ground";
+            chunk.AddMapObject(itemMarker2);
+
+            MapContainer chest = new MapContainer();
+            for (int i = 0; i < 26; i++)
+            {
+                chest.Container.AddItem(healthPotion.Clone());
+            }
+            chest.X = 1;
+            chest.ContainerDescription = "Old Chest";
+            chunk.AddMapObject(chest);
             //END TEST
+        }
+
+        protected override void OnSetPayload()
+        {
+            base.OnSetPayload();
+
+            //Handle payload data from callbacks from other menus.
+            ItemPickupResult itemPickupResult = (ItemPickupResult)lastPayload;
+            if (itemPickupResult != null)
+            {
+                //TODO: Handle stealing or whatever else needs doing. Container management is done within the menu.
+            }
+
         }
 
         protected override void CustomRender()
@@ -254,7 +300,10 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
                 || input.Key.Key == ConsoleKey.I)
             {
                 detailedMode = true;
-                result.Payload = player.Inventory;
+                result.Payload = new ContainerInteractionResult(map, null, player)
+                {
+                    ViewingContainer = player.Inventory
+                };
                 result.Action = "InventoryMenu";
             }
             else if (input.Key.Key == ConsoleKey.Escape)
@@ -296,10 +345,14 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
         {
             MapChunk chunk = map.GetChunkAtWorldSpace(player.X, player.Y);
             List<MapObject> objects = chunk.GetAllObjectsAtWorldCoordinates(player.X, player.Y);
+
+            //Ensure the player is not in the list of interactable objects.
+            objects.Remove(player); 
+
             MapObject interactingObject = objects[index];
             if (interactingObject != null && interactingObject != player)
             {
-                Maps.MapObjects.MapObjectInteractionResult interactionResult = interactingObject.Interact(map);
+                Maps.MapObjects.MapObjectInteractionResult interactionResult = interactingObject.Interact(map, player);
                 result.Action = interactionResult.Action;
                 result.Payload = interactionResult;
 

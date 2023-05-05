@@ -31,9 +31,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             this.dungeonId = dungeonId;
         }
 
-        public override MapObjectInteractionResult Interact(Map map)
+        public override MapObjectInteractionResult Interact(Map map, Character character)
         {
-            var result = base.Interact(map);
+            var result = base.Interact(map, character);
             
             //Navigate over to the dungeon explore menu.
             result.Action = "DungeonExploreMenu";

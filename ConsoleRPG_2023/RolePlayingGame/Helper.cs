@@ -459,5 +459,18 @@ namespace ConsoleRPG_2023.RolePlayingGame
             return Color.FromArgb(red, green, blue);
         }
 
+        /// <summary>
+        /// Converts the first character in the given string to an upper case character.
+        /// </summary>
+        /// <param name="text">The text to be modified.</param>
+        /// <returns>The same string with the first character converted to an upper case character.</returns>
+        public static string FirstCharToUpper(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return text;
+
+            return text[0].ToString().ToUpperInvariant() + text.Substring(1);
+        }
+
     }
 }

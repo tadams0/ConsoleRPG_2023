@@ -1,4 +1,6 @@
 ﻿using ConsoleRPG_2023.RolePlayingGame.Items;
+using ConsoleRPG_2023.RolePlayingGame.Maps;
+using ConsoleRPG_2023.RolePlayingGame.Maps.MapObjects;
 using CustomConsoleColors;
 using System;
 using System.Collections.Generic;
@@ -9,18 +11,35 @@ using System.Threading.Tasks;
 
 namespace ConsoleRPG_2023.RolePlayingGame.Renderers
 {
-    public class ItemRenderer<T> where T : Item
+    public class ItemRenderer : MapObjectRenderer
     {
-        private static string defaultWorldDisplay = "i";
+        private static string defaultDisplayChar = "i";
 
-        private static Random testRandom = new Random();
+        private static readonly Color defaultColor = Color.Yellow;
 
         public ItemRenderer() 
         { 
-        
+            renderedType = typeof(MapItem);
         }
 
-        public virtual string GetContainerDisplay(T item, int maxSize)
+
+        public override string GetDisplayCharacter(MapObject obj, Tile tile, GameState state)
+        {
+            return defaultDisplayChar;
+        }
+
+        public override ConsoleColor GetDisplayColor(MapObject obj, Tile tile, GameState state)
+        {
+            return ConsoleColor.Yellow;
+        }
+
+        public override string GetForegroundColor(MapObject obj, Tile tile, GameState state)
+        {
+            Color c = defaultColor;
+            return VirtualConsoleSequenceBuilder.GetColorForegroundSequence(c);
+        }
+
+        public virtual string GetContainerDisplay(Item item, int maxSize)
         {
             Color backgroundColor = Color.Black;
             Color foregroundColor = Color.Violet;
@@ -42,20 +61,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Renderers
                     displayName = displayName.Substring(0, maxSize);
                 }
             }
-            return backgroundColorStr + foregroundColorStr + displayName;
+            return backgroundColorStr + foregroundColorStr + displayName + VirtualConsoleSequenceBuilder.Default;
         }
 
-        public virtual Color GetWorldDisplayColor(T item)
-        {
-            return Color.Red;
-        }
-
-        public virtual string GetWorldDisplay(T item)
-        {
-            Color c = GetWorldDisplayColor(item);
-            string color = VirtualConsoleSequenceBuilder.GetColorForegroundSequence(c);
-            return color + defaultWorldDisplay;
-        }
 
     }
 }

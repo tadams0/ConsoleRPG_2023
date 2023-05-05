@@ -11,6 +11,6 @@ namespace ConsoleRPG_2023.RolePlayingGame
     {
         private static long idCounter = 1;
 
-        public long Id { get; } = idCounter++; //Set to idCounter and increment it.
+        public virtual long Id { get; } = idCounter++; //Set to idCounter and increment it.
     }
 }

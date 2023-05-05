@@ -40,6 +40,15 @@ namespace ConsoleRPG_2023.RolePlayingGame
 
         public BiomeType GetBiomeType()
         {
+            if (Temperature > 270 && Height < 200)
+            {
+                return BiomeType.Ocean;
+            }
+            else if (Temperature < 270 && Height < 200)
+            {
+                return BiomeType.FrozenOcean;
+            }
+
             if (Fertility < 18)
             {//corrupted lands.
                 if (Temperature > 365)
@@ -54,7 +63,7 @@ namespace ConsoleRPG_2023.RolePlayingGame
                 {
                     return BiomeType.CorruptedDesert;
                 }
-                else if (Temperature < 310 && Temperature > 278 && Moisture > 70)
+                else if (Temperature < 315 && Temperature > 278 && Moisture > 70)
                 {
                     return BiomeType.CorruptedForest;
                 }
@@ -79,7 +88,7 @@ namespace ConsoleRPG_2023.RolePlayingGame
                     return BiomeType.SnowyPlains;
                 }
             }
-            else if (Temperature > 310) //100 degrees F
+            else if (Temperature > 315) //100 degrees F
             {
                 if (Moisture < 60 && Height > 600 && Temperature > 330)
                 {
@@ -90,49 +99,41 @@ namespace ConsoleRPG_2023.RolePlayingGame
                     return BiomeType.IntenseDesert;
                 }
             }
-            else if (Height < 676)
+            else if (Height < 720)
             {
-                if (Moisture > 70 && Height > 200 && Fertility > 75)
+                if (Moisture > 70 && Height > 200 && Fertility > 70)
                 {
                     return BiomeType.DenseForest;
                 }
-                else if (Moisture > 60 && Height > 200 && Fertility > 50)
+                else if (Moisture > 55 && Height > 200 && Fertility > 45)
                 {
                     return BiomeType.Forest;
                 }
-                else if (Moisture > 40 && Height > 200 && Fertility > 35)
+                else if (Moisture > 35 && Height > 200 && Fertility > 30)
                 {
                     return BiomeType.Woodland;
                 }
-                else if (Moisture > 30 && Height > 200 && Fertility > 20)
+                else if (Moisture > 25 && Height > 200 && Fertility > 20)
                 {
                     return BiomeType.Plains;
                 }
             }
 
-            if (Height > 900)
+            if (Height > 925)
             {
                 return BiomeType.ExtremeMountains;
             }
-            else if (Height > 775)
+            else if (Height > 825)
             {
                 return BiomeType.Mountains;
             }
-            else if (Height > 675 && Temperature > 283)
+            else if (Height > 720 && Temperature > 283)
             {
                 return BiomeType.Highlands;
             }
-            else if (Moisture < 45 && Temperature > 310)
+            else if (Moisture < 45 && Temperature > 315)
             {
                 return BiomeType.Desert;
-            }
-            else if (Temperature > 270 && Height < 200)
-            {
-                return BiomeType.Ocean;
-            }
-            else if (Temperature < 270 && Height < 200)
-            {
-                return BiomeType.FrozenOcean;
             }
             else if (Moisture > 70 && Fertility > 59 && Temperature > 300 && Height < 400)
             {
@@ -142,7 +143,7 @@ namespace ConsoleRPG_2023.RolePlayingGame
             {
                 return BiomeType.Bog;
             }
-            else if (Moisture > 70 && Fertility > 90 && Temperature > 280 && Temperature < 310)
+            else if (Moisture > 70 && Fertility > 90 && Temperature > 280 && Temperature < 315)
             {
                 return BiomeType.FertileFarmLand;
             }

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -74,8 +75,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// <br/>Most importantly, smaller values = more dense noise generation and higher CPU usage in map
         /// generation. Larger values = larger noise generation and reduced CPU usage in generation.
         /// </summary>
-        private double biomeInfluenceRectWidth = 2;
-        private double biomeInfluenceRectHeight = 2;
+        private double biomeInfluenceRectWidth = 4;
+        private double biomeInfluenceRectHeight = 4;
 
         private int biomesPerInfluenceRect = 1;
 
@@ -85,15 +86,15 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         private double minMoisture = 0;
         private double moistureRange;
 
-        private double maxTemperature = 400;
-        private double minTemperature = 170;
+        private double maxTemperature = 410;
+        private double minTemperature = 160;
         private double temperatureRange;
 
         private double maxHeight = 1000;
         private double minHeight = 0;
         private double heightRange;
 
-        private double maxFertility = 120;
+        private double maxFertility = 125;
         private double minFertility = 0;
         private double fertilityRange;
 
@@ -220,13 +221,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                     longNoiseX = worldChunkX + i;
                     longNoiseY = worldChunkY + j;
 
-                    if (worldX == longNoiseX &&  worldY == longNoiseY)
-                    {
-                        int TESTONLY = 1;
-                    }
-
                     //float noiseValue = OpenSimplex2S.Noise2_ImproveX(seed, noiseX * mapScale, noiseY * mapScale);
                     double noiseValue = 1;
+
                     //double noiseValue = WorleyNoise.GetNoise(longNoiseX, longNoiseY, points, 0);
                     float biomeValue = OpenSimplex2S.Noise2_ImproveX(seed, noiseX * biomeScale, noiseY * biomeScale);
 
@@ -695,12 +692,18 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         {
             double moisture = Math.Clamp(random.NextDouble() * moistureRange + minMoisture, minMoisture, maxMoisture);
 
-            double averagedTemp = Math.Clamp(random.NextDouble() * temperatureRange + minTemperature, minTemperature, maxTemperature)
-                                + Math.Clamp(random.NextDouble() * temperatureRange + minTemperature, minTemperature, maxTemperature);
+            double summedTemp = random.NextDouble() * temperatureRange
+                                + random.NextDouble() * temperatureRange
+                                + random.NextDouble() * temperatureRange
+                                + random.NextDouble() * temperatureRange;
 
-            double temperature = Math.Clamp(averagedTemp * 0.5, minTemperature, maxTemperature);
+            double temperature = Math.Clamp(summedTemp * 0.25 + minTemperature, minTemperature, maxTemperature);
 
-            double fertility = Math.Clamp(random.NextDouble() * fertilityRange + minFertility, minFertility, maxFertility);
+            double summedFert = random.NextDouble() * fertilityRange
+                + random.NextDouble() * fertilityRange;
+
+            double fertility = Math.Clamp(summedFert * 0.5 + minFertility, minFertility, maxFertility);
+
             double height = Math.Clamp(random.NextDouble() * heightRange + minHeight, minHeight, maxHeight);
 
             return new BiomeData(moisture, temperature,height, fertility);

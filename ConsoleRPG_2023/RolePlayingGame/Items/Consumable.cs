@@ -29,6 +29,21 @@ namespace ConsoleRPG_2023.RolePlayingGame.Items
         
         }
 
+        public override Item Clone()
+        {
+            Consumable clone = new Consumable()
+            {
+                Name = Name,
+                Description = Description,
+                Owner = Owner,
+                Category = Category,
+                Noun = Noun,
+                ItemType = ItemType,
+                ActionVerb = ActionVerb
+            };
+
+            return clone;
+        }
 
     }
 }

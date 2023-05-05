@@ -34,6 +34,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
             get { return dungeonEntrance; }
         }
 
+        private int brushThickness = 5;
+
         private int maxChunksHorizontal;
         private int maxChunksVertical;
 
@@ -47,6 +49,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
 
         public DungeonMap(int maxChunksHorizontal, int maxChunksVertical)
         {
+            //chunkWidth = 16;
+            //chunkHeight = 16;
             this.maxChunksHorizontal = maxChunksHorizontal;
             this.maxChunksVertical = maxChunksVertical;
 
@@ -92,14 +96,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
                 else
                 {
                     chunk = new MapChunk(chunkId, currentChunkX, currentChunkY, chunkWidth, chunkHeight);
+                    this.AddChunkInChunkSpace(chunk);
                 }
 
                 FillChunk(chunk, startX, startY, out end);
 
-                if (!chunkExists)
-                {
-                    this.AddChunkInChunkSpace(chunk);
-                }
 
                 if (end.X < 0)
                 { //End on the left
@@ -135,23 +136,63 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
         private void FillChunk(MapChunk chunk, int startingX, int startingY, out Point end)
         {
             MapChunk newChunk = chunk;
-            int downBias = 20;
-            int rightBias = 20;
-            int leftBias = 0;
-            int upBias = 0;
+            int downBias = 27;
+            int rightBias = 25;
+            int leftBias = 25;
+            int upBias = 25;
 
             bool reachedEnd = false;
             int currentX = startingX;
             int currentY = startingY;
 
+            long worldX;
+            long worldY;
+
             end = Point.Empty;
 
             while (!reachedEnd)
             {
-                byte newTileId = newChunk.GetTileId(currentX, currentY);
-                Tile room = GenerateTile(newTileId);
+                byte newTileId;
+                Tile room;
+                for (int i = 0; i < brushThickness; i++)
+                {
+                    for (int j = 0; j < brushThickness; j++)
+                    {
+                        worldX = newChunk.X * chunkWidth + currentX + i;
+                        worldY = newChunk.Y * ChunkHeight + currentY + j;
 
-                newChunk.SetTileRelative(currentX, currentY, room);
+                        MapChunk existingChunk = GetChunkAtWorldSpace(worldX, worldY);
+
+                        if (existingChunk == null)
+                        {//If the brush size goes beyond the newChunk,
+                            //Then we must generate a new one to place the overflow in.
+                            long chunkId = GetChunkIdFromWorldSpace(worldX, worldY);
+                            Point chunkXY = GetLocalChunkSpaceFromWorldSpace(worldX, worldY);
+                            chunk = new MapChunk(chunkId, chunkXY.X, chunkXY.Y, chunkWidth, chunkHeight);
+                            this.AddChunkInChunkSpace(chunk);
+
+                            newTileId = newChunk.GetTileIdFromWorldCoordinates(worldX, worldY);
+                            room = GenerateTile(newTileId);
+
+                            chunk.SetTileByWorldCoordinates(worldX, worldY, room);
+                        }
+                        else if (existingChunk != newChunk)
+                        {
+                            newTileId = newChunk.GetTileIdFromWorldCoordinates(worldX, worldY);
+                            room = GenerateTile(newTileId);
+
+                            existingChunk.SetTileByWorldCoordinates(worldX, worldY, room);
+                        }
+                        else
+                        {
+                            newTileId = newChunk.GetTileId(currentX + i, currentY+j);
+                            room = GenerateTile(newTileId);
+
+                            newChunk.SetTileRelative(currentX + i, currentY + j, room);
+                        }
+
+                    }
+                }
 
                 Point directionVector = ChooseDirection(upBias, rightBias, downBias, leftBias);
                 currentX += directionVector.X;
