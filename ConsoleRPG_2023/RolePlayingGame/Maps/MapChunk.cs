@@ -73,7 +73,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                 for (byte j = 0; j < height; j++)
                 {
                     tileId = (byte)(j * width + i);
-                    newTile = new Tile(tileId);
+                    newTile = new Tile();
                     tiles[tileId] = newTile;
                 }
             }
@@ -250,13 +250,13 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         {
             //This is repeated to prevent additional overhead of making a point.
             int localTileX = Math.Abs((int)(x % width));
-            if (x < 0)
+            if (x < 0 && localTileX != 0)
             {//Flip x
                 //When negative, -1 is the minimum value, -16 is the highest value possible (in world coordinates).
                 localTileX = width - localTileX;
             }
             int localTileY = Math.Abs((int)(y % height));
-            if (y < 0)
+            if (y < 0 && localTileY != 0 )
             {//Flip y
                 localTileY = height - localTileY;
             }

@@ -39,6 +39,10 @@ namespace ConsoleRPG_2023.RolePlayingGame.Renderers
             return VirtualConsoleSequenceBuilder.GetColorForegroundSequence(c);
         }
 
+        /// <summary>
+        /// Gets the expected display for the given <see cref="Item"/> instance when viewed within a container.
+        /// <br/>Note that this has color bleed and will bleed over into the proceeding text.
+        /// </summary>
         public virtual string GetContainerDisplay(Item item, int maxSize)
         {
             Color backgroundColor = Color.Black;
@@ -61,7 +65,20 @@ namespace ConsoleRPG_2023.RolePlayingGame.Renderers
                     displayName = displayName.Substring(0, maxSize);
                 }
             }
-            return backgroundColorStr + foregroundColorStr + displayName + VirtualConsoleSequenceBuilder.Default;
+            return backgroundColorStr + foregroundColorStr + displayName;
+        }
+        
+        /// <summary>
+        /// Gets the expected display for the given <see cref="Item"/> instance when viewed within a container.
+        /// <br/>Note that this restores colors to default and prevents color bleed.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="maxSize"></param>
+        /// <returns></returns>
+        public virtual string GetContainerDisplayNoBleed(Item item, int maxSize)
+        {
+            string s = GetContainerDisplay(item, maxSize);
+            return s + VirtualConsoleSequenceBuilder.Default;
         }
 
 

@@ -80,10 +80,21 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         }
 
         /// <summary>
+        /// Converts the x and y world space coordinates to relative 0-chunkWidth, 0-chunkHeight chunk space coordinates.
+        /// </summary>
+        public Point GetLocalChunkSpaceFromWorldSpace(long x, long y)
+        {
+            int localChunkX = (int)Math.Floor((decimal)x / chunkWidth);
+            int localChunkY = (int)Math.Floor((decimal)y / chunkHeight);
+
+            return new Point(localChunkX + (int)(x % chunkWidth), localChunkY + (int)(y % chunkHeight));
+        }
+
+        /// <summary>
         /// Gets the local position of the chunk that is at the given world x and y coordinates.
         /// <br/>Local position of the chunks starts at 0,0. So the first chunk will be 0,0. The next at 0,1. 0,2 and so on.
         /// </summary>
-        public Point GetLocalChunkSpaceFromWorldSpace(long x, long y)
+        public Point GetLocalChunkXYFromWorldSpace(long x, long y)
         {
             int localChunkX = (int)Math.Floor((decimal)x / chunkWidth);
             int localChunkY = (int)Math.Floor((decimal)y / chunkHeight);

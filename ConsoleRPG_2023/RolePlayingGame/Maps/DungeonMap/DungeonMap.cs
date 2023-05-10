@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,14 +35,19 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
             get { return dungeonEntrance; }
         }
 
-        private int brushThickness = 5;
+        private int brushThickness = 3;
+        private bool circleBrush = false;
+
+        private int maxBranchChunks = 10;
+
+        private int branchChance = 11;
 
         private int maxChunksHorizontal;
         private int maxChunksVertical;
 
         private long dungeonId;
 
-        private string dungeonName;
+        private string dungeonName = "Unnamed Dungeon";
 
         private Point dungeonEntrance;
 
@@ -58,7 +64,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
             Point entrance = new Point(0, 0);
             this.SetEntrance(entrance);
 
-            GenerateMap(maxChunksHorizontal, maxChunksVertical);
+            GenerateMap();
         }
 
         /// <summary>
@@ -70,15 +76,28 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
             dungeonEntrance = entranceLocation;
         }
 
-        private void GenerateMap(int maxChunksHorizontal, int maxChunksVertical)
+        private void GenerateMap()
         {
+            /*
+            int downBias = 40;
+            int rightBias = 30;
+            int leftBias = 30;
+            int upBias = 25;
+            */
+
+            int downBias = 90;
+            int rightBias = 10;
+            int leftBias = 0;
+            int upBias = 0;
+
+            GenerateBranch(0, 0, 0, 0, downBias, rightBias, leftBias, upBias, maxChunksHorizontal, maxChunksVertical, true);
+        }
+
+        private void GenerateBranch(int currentChunkX, int currentChunkY, int startX, int startY, int downBias, int rightBias, int leftBias, int upBias, int maxChunksHorizontal, int maxChunksVertical, bool allowFurtherBranches)
+        {
+            int originalChunkX = currentChunkX;
+            int originalChunkY = currentChunkY;
             bool willExceedBounds = false;
-
-            int currentChunkX = 0;
-            int currentChunkY = 0;
-
-            int startX = 0;
-            int startY = 0;
 
             bool chunkExists = true;
 
@@ -99,8 +118,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
                     this.AddChunkInChunkSpace(chunk);
                 }
 
-                FillChunk(chunk, startX, startY, out end);
-
+                FillChunk(chunk, startX, startY, downBias, upBias, rightBias, leftBias, out end);
 
                 if (end.X < 0)
                 { //End on the left
@@ -128,18 +146,45 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
                     startX = end.X;
                 }
 
-                willExceedBounds = Math.Abs(currentChunkX) + 1 > maxChunksHorizontal
-                    || Math.Abs(currentChunkY) + 1 > maxChunksVertical;
+                willExceedBounds = Math.Abs(currentChunkX - originalChunkX) + 1 > maxChunksHorizontal
+                    || Math.Abs(currentChunkY - originalChunkY) + 1 > maxChunksVertical;
+
+                if (!willExceedBounds && allowFurtherBranches)
+                {
+                    //Check if we should make a new branch
+                    if (rand.Next(1, 101) < branchChance)
+                    {
+                        //Setup new dungeon branch biases and generation variables.
+                        int leftRightChance = rand.Next(1, 101);
+                        int upDownChance = rand.Next(1, 101);
+
+                        //Swap main branch biases.
+                        int branchLeftBias = upBias;
+                        int branchRightBias = downBias;
+                        if (upDownChance > 50)
+                        {
+                            branchLeftBias = downBias;
+                            branchRightBias = upBias;
+                        }
+
+                        int branchUpBias = leftBias;
+                        int branchDownBias= rightBias;
+                        if (leftRightChance > 50)
+                        {
+                            branchUpBias = rightBias;
+                            branchDownBias = leftBias;
+                        }
+
+                        //Recursion
+                        this.GenerateBranch(currentChunkX, currentChunkY, startX,startY, branchDownBias, branchRightBias, branchLeftBias, branchUpBias, maxBranchChunks, maxBranchChunks, false);
+                    }
+                }
             }
         }
 
-        private void FillChunk(MapChunk chunk, int startingX, int startingY, out Point end)
+        private void FillChunk(MapChunk chunk, int startingX, int startingY, int downBias, int upBias, int rightBias, int leftBias, out Point end)
         {
             MapChunk newChunk = chunk;
-            int downBias = 27;
-            int rightBias = 25;
-            int leftBias = 25;
-            int upBias = 25;
 
             bool reachedEnd = false;
             int currentX = startingX;
@@ -148,16 +193,29 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
             long worldX;
             long worldY;
 
+            float halfBrushThicknessFloat = brushThickness / 2f;
+            int halfBrushThickness = brushThickness / 2;
+            int otherHalfBrushThickness = brushThickness - halfBrushThickness;
+
             end = Point.Empty;
 
+            Tile room;
             while (!reachedEnd)
             {
-                byte newTileId;
-                Tile room;
-                for (int i = 0; i < brushThickness; i++)
+                for (int i = -halfBrushThickness; i < otherHalfBrushThickness; i++)
                 {
-                    for (int j = 0; j < brushThickness; j++)
+                    for (int j = -halfBrushThickness; j < otherHalfBrushThickness; j++)
                     {
+                        if (circleBrush)
+                        {
+                            Vector2 currentXY = new Vector2(currentX + i, currentY + j);
+                            Vector2 center = new Vector2(currentX + halfBrushThicknessFloat, currentY + halfBrushThicknessFloat);
+                            float distance = Vector2.Distance(currentXY, center);
+                            if (distance - 0.1f > halfBrushThicknessFloat)
+                            {
+                                continue;
+                            }
+                        }
                         worldX = newChunk.X * chunkWidth + currentX + i;
                         worldY = newChunk.Y * ChunkHeight + currentY + j;
 
@@ -167,30 +225,24 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
                         {//If the brush size goes beyond the newChunk,
                             //Then we must generate a new one to place the overflow in.
                             long chunkId = GetChunkIdFromWorldSpace(worldX, worldY);
-                            Point chunkXY = GetLocalChunkSpaceFromWorldSpace(worldX, worldY);
-                            chunk = new MapChunk(chunkId, chunkXY.X, chunkXY.Y, chunkWidth, chunkHeight);
-                            this.AddChunkInChunkSpace(chunk);
-
-                            newTileId = newChunk.GetTileIdFromWorldCoordinates(worldX, worldY);
-                            room = GenerateTile(newTileId);
-
-                            chunk.SetTileByWorldCoordinates(worldX, worldY, room);
+                            Point chunkXY = GetLocalChunkXYFromWorldSpace(worldX, worldY);
+                            existingChunk = new MapChunk(chunkId, chunkXY.X, chunkXY.Y, chunkWidth, chunkHeight);
+                            this.AddChunkInChunkSpace(existingChunk);
                         }
-                        else if (existingChunk != newChunk)
+
+                        room = GenerateTile();
+
+                        var currentTile = chunk.GetTileAtWorldCoordinates(worldX, worldY);
+
+                        if (i == 0 && j == 0)
                         {
-                            newTileId = newChunk.GetTileIdFromWorldCoordinates(worldX, worldY);
-                            room = GenerateTile(newTileId);
-
-                            existingChunk.SetTileByWorldCoordinates(worldX, worldY, room);
+                            room.TileType = TileType.HellRock;
+                            newChunk.SetTileByWorldCoordinates(worldX, worldY, room);
                         }
-                        else
+                        else if (currentTile.TileType != TileType.HellRock)
                         {
-                            newTileId = newChunk.GetTileId(currentX + i, currentY+j);
-                            room = GenerateTile(newTileId);
-
-                            newChunk.SetTileRelative(currentX + i, currentY + j, room);
+                            newChunk.SetTileByWorldCoordinates(worldX, worldY, room);
                         }
-
                     }
                 }
 
@@ -242,9 +294,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
             return new Point(0, 0); //this code should not be reached
         }
 
-        public Tile GenerateTile(byte id)
+        private Tile GenerateTile()
         {
-            Tile t = new Tile(id);
+            Tile t = new Tile();
             t.TileType = TileType.Stone;
             return t;
         }

@@ -59,7 +59,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
 
         protected override string CreateMessage()
         {
-            return $"You see a {item.Noun} {payload.LocationDescription}.\n{itemRenderer.GetContainerDisplay(item, Console.WindowWidth)}\n{item.Description}";
+            return $"You see a {item.Noun} {payload.LocationDescription}.\n{itemRenderer.GetContainerDisplayNoBleed(item, Console.WindowWidth)}\n{item.Description}";
         }
 
         public override InputResult GetMenuInput()

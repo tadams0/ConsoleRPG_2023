@@ -50,7 +50,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps.MapObjects
 
         public override string ToString()
         {
-            return itemRenderer.GetContainerDisplay(item, Console.WindowWidth);
+            return itemRenderer.GetContainerDisplayNoBleed(item, Console.WindowWidth);
         }
     }
 }

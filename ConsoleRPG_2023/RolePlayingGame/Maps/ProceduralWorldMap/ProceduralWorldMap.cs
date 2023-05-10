@@ -187,17 +187,82 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
         private MapChunk GenerateChunk(long worldX, long worldY)
         {
-            Point localChunkSpace = GetLocalChunkSpaceFromWorldSpace(worldX, worldY);
-            long chunkId = GetChunkIdInChunkSpace(localChunkSpace.X, localChunkSpace.Y);
+            Point localChunkXY = GetLocalChunkXYFromWorldSpace(worldX, worldY);
+            long chunkId = GetChunkIdInChunkSpace(localChunkXY.X, localChunkXY.Y);
             double noiseX;
             double noiseY;
             long longNoiseX;
             long longNoiseY;
-            long worldChunkX = localChunkSpace.X * chunkWidth;
-            long worldChunkY = localChunkSpace.Y * chunkHeight;
+            long worldChunkX = localChunkXY.X * chunkWidth;
+            long worldChunkY = localChunkXY.Y * chunkHeight;
 
             //Generate a new chunk.
-            MapChunk chunk = new MapChunk(chunkId, localChunkSpace.X, localChunkSpace.Y, chunkWidth, chunkHeight);
+            MapChunk chunk = new MapChunk(chunkId, localChunkXY.X, localChunkXY.Y, chunkWidth, chunkHeight);
+
+            if (localChunkXY.X == -1)
+            {
+                int test = 0;
+            }
+            //TEST ONLY
+            //GRID
+            /*
+             
+            for (int i = 0; i < chunkWidth; i++)
+            {
+                for (int j = 0; j < chunkHeight; j++)
+                {
+                    Tile t = new Tile();
+                    if ((i + j) % 2 == 0)
+                    {
+                        t.TileType = TileType.Corrupted;
+                    }
+                    else
+                    {
+                        t.TileType = TileType.GrassMild;
+                    }
+                    chunk.SetTileRelative(i, j, t);
+                }
+            }
+
+            return chunk;
+            */
+            
+            // slash (/)
+            /*
+            if (localChunkXY.X < 0 && localChunkXY.Y < 0)
+            {
+                int TEST = 0;
+            }
+            else
+            {
+                int TEST = 0;
+            }
+            for (int j = 0; j < chunkHeight; j++)
+            {
+                for (int i = 0; i < chunkWidth; i++)
+                {
+                    Tile t = new Tile();
+                    if ((i + j) % 4 == 0)
+                    {
+                        t.TileType = TileType.Corrupted;
+                    }
+                    else
+                    {
+                        t.TileType = TileType.GrassMild;
+                    }
+                    chunk.SetTileRelative(i, j, t);
+                    Tile tileTest = chunk.GetTileRelativeCoordinates(i, j);
+                    Tile worldTileTest = chunk.GetTileAtWorldCoordinates(worldChunkX +i, worldChunkY +j);
+                    if (t != tileTest || t != worldTileTest)
+                    {
+                        int TESTONLY = 0;
+                    }
+                }
+            }
+            
+            return chunk;
+            */
+            //END TEST
 
             //Before filling the chunk we data, we generate surrounding biome points so the worley noise can
             //generate and lerp between biomes.

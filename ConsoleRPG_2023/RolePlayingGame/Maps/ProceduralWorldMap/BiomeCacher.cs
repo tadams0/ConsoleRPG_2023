@@ -45,11 +45,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                     return TileType.Water;
                 }
                 int rand = random.Next(0, 100);
-                int rand2 = random.Next(505, 515);
+                int rand2 = random.Next(605, 615);
                 int witherThreshold = random.Next(317, 323);
                 if (x.Height > rand2)
                 {
-                    if (rand < Math.Min(95,(x.Height - 500) / 2))
+                    if (rand < Math.Min(95,(x.Height - 600) / 2))
                     {
                         return TileType.MountainRock;
                     }
