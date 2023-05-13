@@ -53,6 +53,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             base.CustomRender();
 
             mapRenderer.DrawMapCenterOnCoordinates(player.X, player.Y);
+
+            Console.WriteLine($"X: {player.X} Y: {player.Y}");
         }
 
         protected override OptionDisplay CreateOptions()

@@ -48,17 +48,29 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
         public float InverseRegionHeight { get; private set; }
 
+        /// <summary>
+        /// Gets the random generator assigned to the biome region.
+        /// </summary>
+        public Random Random
+        {
+            get { return random; }
+        }
+
 
         private Dictionary<PointL, BiomeData> biomeData = new Dictionary<PointL, BiomeData>();
 
         private RectL region;
 
-        public BiomeRegionData(RectL region, List<KeyValuePair<PointL, BiomeData>> dataPoints)
+        private Random random;
+
+        public BiomeRegionData(RectL region, List<KeyValuePair<PointL, BiomeData>> dataPoints, Random random)
         {
             if (dataPoints.Count > 2)
             {
                 Voronoi = WorleyNoise.CreateVoronoi(dataPoints, region);
             }
+
+            this.random = random;
 
             SetRegion(region);
             foreach (var pair in dataPoints)
@@ -67,12 +79,14 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             }
         }
 
-        public BiomeRegionData(RectL region, IEnumerable<KeyValuePair<PointL, BiomeData>> dataPoints)
+        public BiomeRegionData(RectL region, IEnumerable<KeyValuePair<PointL, BiomeData>> dataPoints, Random random)
         {
             if (dataPoints.Count() > 2)
             {
                 Voronoi = WorleyNoise.CreateVoronoi(dataPoints.ToList(), region);
             }
+
+            this.random = random;
 
             SetRegion(region);
             foreach (var pair in dataPoints)

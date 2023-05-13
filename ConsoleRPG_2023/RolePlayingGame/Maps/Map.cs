@@ -43,6 +43,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         protected int chunkWidth = 16;
         protected int chunkHeight = 16;
 
+        protected long seed = 1;
+
         /// <summary>
         /// The total maximum number of chunks, in one direction from 0,0.
         /// <br/> This is by default int.MaxValue * 32 or 1,099,511,627,264 chunks.
@@ -60,6 +62,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
         public Map()
         {
+            this.seed = new Random().Next(0, int.MaxValue);
+        }
+
+        public Map(long seed)
+        {
+            this.seed = seed;
         }
 
         /// <summary>

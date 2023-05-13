@@ -114,7 +114,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
                 }
                 else
                 {
-                    chunk = new MapChunk(chunkId, currentChunkX, currentChunkY, chunkWidth, chunkHeight);
+                    chunk = new MapChunk(chunkId, currentChunkX, currentChunkY, chunkWidth, chunkHeight, seed);
                     this.AddChunkInChunkSpace(chunk);
                 }
 
@@ -226,22 +226,22 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
                             //Then we must generate a new one to place the overflow in.
                             long chunkId = GetChunkIdFromWorldSpace(worldX, worldY);
                             Point chunkXY = GetLocalChunkXYFromWorldSpace(worldX, worldY);
-                            existingChunk = new MapChunk(chunkId, chunkXY.X, chunkXY.Y, chunkWidth, chunkHeight);
+                            existingChunk = new MapChunk(chunkId, chunkXY.X, chunkXY.Y, chunkWidth, chunkHeight, seed);
                             this.AddChunkInChunkSpace(existingChunk);
                         }
 
                         room = GenerateTile();
 
-                        var currentTile = chunk.GetTileAtWorldCoordinates(worldX, worldY);
-
+                        var currentTile = existingChunk.GetTileAtWorldCoordinates(worldX, worldY);
+                        
                         if (i == 0 && j == 0)
                         {
                             room.TileType = TileType.HellRock;
-                            newChunk.SetTileByWorldCoordinates(worldX, worldY, room);
+                            existingChunk.SetTileByWorldCoordinates(worldX, worldY, room);
                         }
                         else if (currentTile.TileType != TileType.HellRock)
                         {
-                            newChunk.SetTileByWorldCoordinates(worldX, worldY, room);
+                            existingChunk.SetTileByWorldCoordinates(worldX, worldY, room);
                         }
                     }
                 }

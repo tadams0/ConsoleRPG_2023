@@ -21,11 +21,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
         private HashSet<TileType> allowedTilesForBlending = new HashSet<TileType>();
 
-        private SortedDictionary<int, Func<BiomeData, TileType>> tileMappings = new SortedDictionary<int, Func<BiomeData, TileType>>();
+        private SortedDictionary<int, Func<BiomeData, Random, TileType>> tileMappings = new SortedDictionary<int, Func<BiomeData, Random, TileType>>();
 
-        private SortedDictionary<int, Func<BiomeData, Tile, MapObject>> objectInitMutliTileFunctions = new SortedDictionary<int, Func<BiomeData, Tile, MapObject>>();
+        private SortedDictionary<int, Func<BiomeData, Random, Tile, MapObject>> objectInitMutliTileFunctions = new SortedDictionary<int, Func<BiomeData, Random, Tile, MapObject>>();
 
-        private SortedDictionary<int, Func<BiomeData, Tile, MapObject>> objectInitSingleTileFunctions = new SortedDictionary<int, Func<BiomeData, Tile, MapObject>>();
+        private SortedDictionary<int, Func<BiomeData, Random, Tile, MapObject>> objectInitSingleTileFunctions = new SortedDictionary<int, Func<BiomeData, Random, Tile, MapObject>>();
 
 
         public Biome(BiomeType biomeType)
@@ -33,18 +33,18 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             Type = biomeType;
         }
 
-        public void AddObjectInitSingleTileFunction(int priority, Func<BiomeData, Tile, MapObject> function)
+        public void AddObjectInitSingleTileFunction(int priority, Func<BiomeData, Random, Tile, MapObject> function)
         {
             objectInitSingleTileFunctions[priority] = function;
         }
 
-        public List<MapObject> GetSingleTileObjects(BiomeData data, Tile tile)
+        public List<MapObject> GetSingleTileObjects(BiomeData data, Random rand, Tile tile)
         {
             List<MapObject> result = new List<MapObject>();
             MapObject currentObj = null;
             foreach (var pair in objectInitSingleTileFunctions)
             {
-                currentObj = pair.Value(data, tile);
+                currentObj = pair.Value(data, rand, tile);
                 if (currentObj != null)
                 {
                     result.Add(currentObj);
@@ -54,7 +54,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         }
 
 
-        public void AddTileType(int priority, Func<BiomeData, TileType> function)
+        public void AddTileType(int priority, Func<BiomeData, Random, TileType> function)
         {
             tileMappings[priority] = function;
         }
@@ -78,12 +78,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             return allowedTilesForBlending.Contains(tileType);
         }
 
-        public TileType GetTileType(BiomeData data)
+        public TileType GetTileType(BiomeData data, Random rand)
         {
             TileType result = TileType.None;
             foreach (var pair in tileMappings)
             {
-                result = pair.Value(data);
+                result = pair.Value(data, rand);
                 if (result != TileType.None)
                 {
                     return result;

@@ -103,8 +103,6 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// </summary>
         private bool generateChunksThatDontExist = true;
 
-        private long seed = 1;
-
         private double biomeScale = 0.001;
 
         /// <summary>
@@ -124,8 +122,6 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
         private BiomeCacher biomeCacher;
 
-        private Random random;
-
         #region Worley Noise Generation Variables
         /// <summary>
         /// The scan width/height are the number of influence rectangles to go through on each axis.
@@ -143,10 +139,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         private float magnitude = 7;
         #endregion
 
-        public ProceduralWorldMap()
-            : base()
+        public ProceduralWorldMap(long seed)
+            : base(seed)
         {
-            random = new Random((int)seed);
             moistureRange = maxMoisture - minMoisture;
             temperatureRange = maxTemperature - minTemperature;
             heightRange = maxHeight - minHeight;
@@ -165,7 +160,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             //But the spatial hashmap only uses the "maximum" as a way to generate hash keys. It doesn't need to be equal and can be higher than the max.
             //voronoiRegions = new LimitedSpatialHashmap<Voronoi>(influenceRectWidth, influenceRectHeight, maximumNumberOfChunks * influenceRectWidth);
 
-            biomeCacher = new BiomeCacher(seed);
+            biomeCacher = new BiomeCacher();
             biomeCacher.Build();
         }
 
@@ -197,7 +192,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             long worldChunkY = localChunkXY.Y * chunkHeight;
 
             //Generate a new chunk.
-            MapChunk chunk = new MapChunk(chunkId, localChunkXY.X, localChunkXY.Y, chunkWidth, chunkHeight);
+            MapChunk chunk = new MapChunk(chunkId, localChunkXY.X, localChunkXY.Y, chunkWidth, chunkHeight, seed);
 
             if (localChunkXY.X == -1)
             {
@@ -307,12 +302,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
                     blendBiome = null;
                     TileType expectedTileType = TileType.None;
-                    if (nonRelativeNearestEdgeDist < blendThreshold + random.Next(5,15))
+                    if (nonRelativeNearestEdgeDist < blendThreshold + chunk.Random.Next(5,15))
                     { //Chance to blend neighboring biome
 
                         bool isLeft = nearestSite.isLeft(normalizedPoint, nearestEdge);
 
-                        double randValue = random.NextDouble();
+                        double randValue = chunk.Random.NextDouble();
                         bool blend = randValue > .1 + (nonRelativeNearestEdgeDist / blendThreshold) * 0.95;
 
                         if (blend)
@@ -333,12 +328,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
                             if (isLeft && !blend)
                             {//Site 1
-                                expectedTileType = leftBiome.GetTileType(fullTileData);
+                                expectedTileType = leftBiome.GetTileType(fullTileData, chunk.Random);
                                 blendBiome = leftBiome;
                             }
                             else
                             {//Site 2
-                                expectedTileType = rightBiome.GetTileType(fullTileData);
+                                expectedTileType = rightBiome.GetTileType(fullTileData, chunk.Random);
                                 blendBiome = rightBiome;
                             }
 
@@ -359,17 +354,17 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                         currentBiomeType = localBiomeRegion.GetBiomeType();
                         currentBiome = biomeCacher.GetBiome(currentBiomeType);
 
-                        expectedTileType = currentBiome.GetTileType(fullTileData);
+                        expectedTileType = currentBiome.GetTileType(fullTileData, chunk.Random);
 
                         //Populate the objects now
-                        var objects = currentBiome.GetSingleTileObjects(fullTileData, currentTile);
+                        var objects = currentBiome.GetSingleTileObjects(fullTileData, chunk.Random, currentTile);
                         chunk.AddRangeMapObject(longNoiseX, longNoiseY, objects);
                     }
                     else
                     {
                         //If a blend occured, we want to generate objects based on that blended biome.
 
-                        var objects = blendBiome.GetSingleTileObjects(fullTileData, currentTile);
+                        var objects = blendBiome.GetSingleTileObjects(fullTileData, chunk.Random, currentTile);
                         chunk.AddRangeMapObject(longNoiseX, longNoiseY, objects);
 
                     }
@@ -429,6 +424,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             if (!hasOverarchingBiome)
             {
                 //Create the overarching biome region:
+                //Generate the random number generator seed based off the influence rect starting x and y (upper left)
+                influenceRectX = (MathL.Floor(worldX, influenceRectWidth)) - (influenceRectWidth * halfScanWidth);
+                influenceRectY = (MathL.Floor(worldY, influenceRectHeight)) - (influenceRectHeight * halfScanHeight);
+                int biomeRegionSeed = (int)((influenceRectX + influenceRectY * maximumNumberOfChunks + seed) % int.MaxValue);
+                int tempseed = biomeRegionSeed;
+                Random overarchingRegionRandom = new Random(biomeRegionSeed);
 
                 List<BiomeRegionData> resultingRegions = new List<BiomeRegionData>();
                 List<KeyValuePair<PointL, BiomeData>> totalDataPoints = new List<KeyValuePair<PointL, BiomeData>>(biomesPerInfluenceRect * scanWidth * scanHeight);
@@ -448,13 +449,18 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                         {
                             if (existingRegions.Count <= 0)
                             { //Create the new region
+
+                                //Create the local biome region data random
+                                biomeRegionSeed = (int)((influenceRectX + influenceRectY * maximumNumberOfChunks + seed) % int.MaxValue);
+                                Random rand = new Random(biomeRegionSeed);
+
                                 Dictionary<PointL, BiomeData> dataPoints = new Dictionary<PointL, BiomeData>(biomesPerInfluenceRect);
                                 PointL biomePoint;
                                 for (int i = 0; i < biomesPerInfluenceRect; i++)
                                 {//generate a completely random biome.
-                                    BiomeData newData = GenerateRandomBiomeData();
-                                    double adoptResult = random.NextDouble() * 100;
-                                    double influenceResult = random.NextDouble() * 100;
+                                    BiomeData newData = GenerateRandomBiomeData(rand);
+                                    double adoptResult = rand.NextDouble() * 100;
+                                    double influenceResult = rand.NextDouble() * 100;
                                     bool adoptBiome = adoptResult < biomeAdoptionChance;
                                     bool influenceByBiome = influenceResult < biomeInfluenceChance;
                                     if (adoptBiome || influenceByBiome)
@@ -462,11 +468,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
                                         if (totalDataPoints.Count > 0)
                                         {
-                                            newData = totalDataPoints[random.Next(0, totalDataPoints.Count)].Value;
+                                            newData = totalDataPoints[rand.Next(0, totalDataPoints.Count)].Value;
                                         }
                                         else if (dataPoints.Count > 0)
                                         {
-                                            newData = dataPoints.ElementAt(random.Next(0, dataPoints.Count)).Value;
+                                            newData = dataPoints.ElementAt(rand.Next(0, dataPoints.Count)).Value;
                                         }
                                         else
                                         {//If there were no newly generated or immediately nearby biomes, let's check the biomes within the total influence area.
@@ -482,15 +488,15 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                                         if (influenceByBiome)
                                         {
                                             double varianceDirection = 1;
-                                            if (random.NextDouble() < 0.5)
+                                            if (rand.NextDouble() < 0.5)
                                             {
                                                 varianceDirection = -1;
                                             }
 
-                                            double tempVariance = 1 + random.NextDouble() * biomeInfluencePercentMagnitude * 0.01 * varianceDirection;
-                                            double heightVariance = 1 + random.NextDouble() * biomeInfluencePercentMagnitude * 0.01 * varianceDirection;
-                                            double moistureVariance = 1 + random.NextDouble() * biomeInfluencePercentMagnitude * 0.01 * varianceDirection;
-                                            double fertilityVariance = 1 + random.NextDouble() * biomeInfluencePercentMagnitude * 0.01 * varianceDirection;
+                                            double tempVariance = 1 + rand.NextDouble() * biomeInfluencePercentMagnitude * 0.01 * varianceDirection;
+                                            double heightVariance = 1 + rand.NextDouble() * biomeInfluencePercentMagnitude * 0.01 * varianceDirection;
+                                            double moistureVariance = 1 + rand.NextDouble() * biomeInfluencePercentMagnitude * 0.01 * varianceDirection;
+                                            double fertilityVariance = 1 + rand.NextDouble() * biomeInfluencePercentMagnitude * 0.01 * varianceDirection;
 
                                             double resultingTemp = Math.Clamp(newData.Temperature * tempVariance, minTemperature, maxTemperature);
                                             double resultingMoisture = Math.Clamp(newData.Moisture * moistureVariance, minMoisture, maxMoisture);
@@ -504,7 +510,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
                                     do
                                     {
-                                        biomePoint = RandomPointInRect(influenceRect);
+                                        biomePoint = RandomPointInRect(influenceRect, rand);
                                     }//Keep trying for a new biome point if you somehow selected one that already existed.
                                     while (dataPoints.ContainsKey(biomePoint));
 
@@ -513,7 +519,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
                                 totalDataPoints.AddRange(dataPoints);
 
-                                currentReigon = new BiomeRegionData(influenceRect, dataPoints);
+                                currentReigon = new BiomeRegionData(influenceRect, dataPoints, rand);
 
                                 biomeRegions.Add(influenceRectX, influenceRectY, currentReigon);
 
@@ -535,7 +541,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                 //Combining the regions has the benefit of giving us as many points as we need to work within the provided chunk.
                 //This is because we will have not only the biome points nearby/within the chunk, but also the neighbors to those points.
                 //Assuming that the size of an influence rect is greater than or equal to a chunk.
-                overarchingBiome = new BiomeRegionData(totalInfluenceRect, totalDataPoints);
+                overarchingBiome = new BiomeRegionData(totalInfluenceRect, totalDataPoints, overarchingRegionRandom);
 
                 //Add the overarching biome region incase it's needed in the future.
                 overarchingBiomeRegions.Add(overarchingBiomeKey, overarchingBiome);
@@ -573,7 +579,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             return biomeData;
         }
 
-        private PointL RandomPointInRect(RectL rect)
+        private PointL RandomPointInRect(RectL rect, Random random)
         {
             return new PointL(rect.X + random.Next(0, (int)rect.Width), rect.Y + random.Next(0, (int)rect.Height));
         }
@@ -753,7 +759,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             return blendedResult;
         }
 
-        private BiomeData GenerateRandomBiomeData()
+        private BiomeData GenerateRandomBiomeData(Random random)
         {
             double moisture = Math.Clamp(random.NextDouble() * moistureRange + minMoisture, minMoisture, maxMoisture);
 

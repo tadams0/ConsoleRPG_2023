@@ -208,7 +208,7 @@ namespace ConsoleRPG_2023.RolePlayingGame
             state.PlayerHud = new HUD();
             state.PlayerHud.SetCharacter(state.PlayerCharacter);
 
-            ProceduralWorldMap map = new ProceduralWorldMap();
+            ProceduralWorldMap map = new ProceduralWorldMap(1);
 
             state.WorldMap = map;
             state.MapRenderer = new MapRendererExtraColorRange(map, state, settings, true);

@@ -181,6 +181,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
                     Console.WriteLine($"Biome Type {generalBiomeData.GetBiomeType()} Moisture: {Math.Round(data.Moisture, 2)} Temperature: {Math.Round(data.Temperature, 2)} Fertility: {Math.Round(data.Fertility, 2)} Height: {Math.Round(data.Height, 2)}");
                     Console.WriteLine($"General Biome Stats Moisture: {Math.Round(generalBiomeData.Moisture, 2)} Temperature: {Math.Round(generalBiomeData.Temperature, 2)} Fertility: {Math.Round(generalBiomeData.Fertility, 2)} Height: {Math.Round(generalBiomeData.Height, 2)}");
                 }
+
+                Console.WriteLine($"Chunk seed is: " + map.GetChunkAtWorldSpace(player.X, player.Y).Seed);
             }
 
             if (detailedMode)
