@@ -78,7 +78,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
 
             //Add item to player's inventory and remove it from the map.
             payload.Character.Inventory.AddItem(item);
-            payload.Map.RemoveObject(payload.MapObject);
+            payload.Map.RemoveObject(payload.InteractedMapObject);
 
             result.Action = Helper.ActionBackOrReturn;
             return result;
@@ -95,7 +95,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
 
             //Add item to player's inventory and remove it from the map.
             payload.Character.Inventory.AddItem(item);
-            payload.Map.RemoveObject(payload.MapObject);
+            payload.Map.RemoveObject(payload.InteractedMapObject);
 
             result.Action = Helper.ActionBackOrReturn;
             return result;

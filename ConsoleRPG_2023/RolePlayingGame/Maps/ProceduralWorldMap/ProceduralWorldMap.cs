@@ -61,7 +61,6 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// This get computationally expensive as they generate their own voronoi region to help between cross-biome regions. Overarching biome regions have a lot of overlap with each other.
         /// <br/>Essentially you can think of a single overarching biome region of a union of the 3x3 biome regions or the biome region of a total influence rectangle including 3x3 influence rects.
         /// </summary>
-        //private LimitedSpatialHashmapRevised<BiomeRegionData> overarchingBiomeRegions;
         private Dictionary<PointL, BiomeRegionData> overarchingBiomeRegions;
 
 
@@ -108,7 +107,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// <summary>
         /// Chance of a biome copying the characteristics of its nearby biome exactly. This takes priority over influences.
         /// </summary>
-        private double biomeAdoptionChance = 20;
+        private double biomeAdoptionChance = 25;
 
         /// <summary>
         /// Chances of a biome taking on relative stats of its neighbor.
@@ -118,7 +117,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// <summary>
         /// The percent amount of the temperature/height/moisture/etc that varies when a biome influence occurs.
         /// </summary>
-        private double biomeInfluencePercentMagnitude = 20;
+        private double biomeInfluencePercentMagnitude = 15;
 
         private BiomeCacher biomeCacher;
 
@@ -135,6 +134,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         private int halfScanHeight;
         private long influenceRectWidth;
         private long influenceRectHeight;
+
+        //Blend factor and magnitude effect the worley/vornoi noise generation when averaging the weights of nearby voronoi sites.
         private float blendFactor = 0;
         private float magnitude = 7;
         #endregion
@@ -307,7 +308,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
                         bool isLeft = nearestSite.isLeft(normalizedPoint, nearestEdge);
 
-                        double randValue = chunk.Random.NextDouble();
+                        double randValue = influencingBiomeRegion.Random.NextDouble();
                         bool blend = randValue > .1 + (nonRelativeNearestEdgeDist / blendThreshold) * 0.95;
 
                         if (blend)
@@ -357,14 +358,14 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                         expectedTileType = currentBiome.GetTileType(fullTileData, chunk.Random);
 
                         //Populate the objects now
-                        var objects = currentBiome.GetSingleTileObjects(fullTileData, chunk.Random, currentTile);
+                        var objects = currentBiome.GetSingleTileObjects(fullTileData, chunk.Random, currentTile, longNoiseX, longNoiseY);
                         chunk.AddRangeMapObject(longNoiseX, longNoiseY, objects);
                     }
                     else
                     {
                         //If a blend occured, we want to generate objects based on that blended biome.
 
-                        var objects = blendBiome.GetSingleTileObjects(fullTileData, chunk.Random, currentTile);
+                        var objects = blendBiome.GetSingleTileObjects(fullTileData, chunk.Random, currentTile, longNoiseX, longNoiseY);
                         chunk.AddRangeMapObject(longNoiseX, longNoiseY, objects);
 
                     }

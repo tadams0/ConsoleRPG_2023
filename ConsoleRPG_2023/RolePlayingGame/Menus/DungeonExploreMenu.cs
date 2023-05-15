@@ -33,7 +33,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
         protected override void OnSetPayload()
         {
             MapObjectInteractionResult result = (MapObjectInteractionResult)lastPayload;
-            MapDungeonObj dungeonMarker = (MapDungeonObj)result.MapObject;
+            MapDungeonObj dungeonMarker = (MapDungeonObj)result.InteractedMapObject;
             dungeon = result.Map.GetDungeon(dungeonMarker.DungeonId);
 
             previousMap = result.Map;

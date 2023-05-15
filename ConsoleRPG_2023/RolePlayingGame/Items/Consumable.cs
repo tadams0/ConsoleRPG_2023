@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleRPG_2023.RolePlayingGame.Effects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,6 +22,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Items
             set { actionVerb = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the effect of the consumable. Null implies there is no effect.
+        /// </summary>
+        public Effect Effect { get; set; } = null;
+
         private string actionVerb = "eat";
 
         public Consumable() 
@@ -29,6 +35,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Items
         
         }
 
+        /// <summary>
+        /// Creates a clone of the consumable instance. The clone will share a reference to the effect property.
+        /// </summary>
         public override Item Clone()
         {
             Consumable clone = new Consumable()
@@ -39,7 +48,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Items
                 Category = Category,
                 Noun = Noun,
                 ItemType = ItemType,
-                ActionVerb = ActionVerb
+                ActionVerb = ActionVerb,
+                Effect = Effect
             };
 
             return clone;

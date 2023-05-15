@@ -1,4 +1,5 @@
-﻿using ConsoleRPG_2023.RolePlayingGame.Maps.MapObjects;
+﻿using ConsoleRPG_2023.RolePlayingGame.Effects;
+using ConsoleRPG_2023.RolePlayingGame.Maps.MapObjects;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,18 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// </summary>
         public long Y { get; set; }
 
+        /// <summary>
+        /// Gets the list of active effects in this map.
+        /// </summary>
+        public List<ActiveEffect> ActiveEffects
+        {
+            get { return activeEffects; }
+        }
+
+        /// <summary>
+        /// A list of active effects on this <see cref="MapObject"/> instance.
+        /// </summary>
+        private List<ActiveEffect> activeEffects = new List<ActiveEffect>();
 
         /// <summary>
         /// Interacts with the object.

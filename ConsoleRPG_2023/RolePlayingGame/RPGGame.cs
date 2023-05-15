@@ -1,4 +1,5 @@
-﻿using ConsoleRPG_2023.RolePlayingGame.Maps;
+﻿using ConsoleRPG_2023.RolePlayingGame.Effects;
+using ConsoleRPG_2023.RolePlayingGame.Maps;
 using ConsoleRPG_2023.RolePlayingGame.Menus;
 using ConsoleRPG_2023.RolePlayingGame.Renderers;
 using ConsoleRPG_2023.RolePlayingGame.Text;
@@ -213,6 +214,8 @@ namespace ConsoleRPG_2023.RolePlayingGame
             state.WorldMap = map;
             state.MapRenderer = new MapRendererExtraColorRange(map, state, settings, true);
 
+            //Create effect functions for use elsewhere.
+            EffectFunctionCreator.Init();
         }
 
         private static bool TryGoToMenu(string menuName, InputResult lastInput)

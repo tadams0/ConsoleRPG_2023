@@ -44,44 +44,6 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
         protected override void OnSetGameState()
         {
             base.OnSetGameState();
-            /*
-            viewingContainer = new Container();
-
-            for (int i = 0; i < 250; i++)
-            {
-                if (i % 3 == 0)
-                {
-                    Consumable c = new Consumable();
-                    c.Name = "Scroll of Testing " + i;
-                    c.ActionVerb = "Cast";
-                    c.Description = "A scroll that can be casted to test consumable functionality on items within a menu.";
-                    viewingContainer.AddItem(c);
-                }
-                else if (i % 5 == 0)
-                {
-                    Consumable c = new Consumable();
-                    c.Name = "Bread " + i;
-                    c.ActionVerb = "Eat";
-                    c.Description = "Basic food consumed by a wide range of cultures.";
-                    viewingContainer.AddItem(c);
-                }
-                else if (i % 2 == 0)
-                {
-                    Consumable c = new Consumable();
-                    c.Name = "Potion of Healing " + i;
-                    c.ActionVerb = "Drink";
-                    c.Description = "Medicine that can be used to cure minor or basic wounds.";
-                    viewingContainer.AddItem(c);
-                }
-                else
-                {
-                    Item item = new Item();
-                    item.Name = "Test item #" + i;
-                    item.Description = "A useless bauble from ancient times. It has no known use.";
-                    viewingContainer.AddItem(item);
-                }
-            }
-            */
 
             renderer = new GridRenderer(Console.WindowWidth);
             //renderer.SetFilter(x=>x.OrderByDescending(y=>((Item)y).Name).ToList());
@@ -167,6 +129,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
 
             if (selectedItem != null)
             {
+                //If the selected item is a consumable, then we add the option for the player to activate its verb.
+                //In some cases this is "eat" if it's food, or "drink" if its a potion, etc..
                 if (selectedItem.ItemType == ItemUseType.Consumable)
                 {
                     Consumable c = (Consumable)selectedItem;
@@ -185,7 +149,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
 
         protected override void CustomRender()
         {
-            if (payload.MapObject == null)
+            if (payload.InteractedMapObject == null)
             {//The mapobject is null when the player is viewing their own inventory.
                 Helper.WriteFormattedString($"When looking inside your inventory, you find:");
             }
@@ -292,6 +256,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             
             RemoveSelectedItem();
 
+            MapObject triggerCharacter = payload.Character;
+
+            Map map = payload.Map;
+
+            map.AddActiveEffectToObject(GameState, triggerCharacter, c.Effect);
+            
             //TODO: actually do something with the consumable.
 
             return result;

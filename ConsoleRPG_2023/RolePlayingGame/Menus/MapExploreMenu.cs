@@ -1,4 +1,5 @@
 ﻿using ConsoleRPG_2023.RolePlayingGame.Dungeons;
+using ConsoleRPG_2023.RolePlayingGame.Effects;
 using ConsoleRPG_2023.RolePlayingGame.Items;
 using ConsoleRPG_2023.RolePlayingGame.Maps;
 using ConsoleRPG_2023.RolePlayingGame.Maps.MapObjects;
@@ -87,6 +88,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
 
             chunk.AddMapObject(0, 0, dungeonMarker);
 
+            Effect staminaHealEffect = EffectCreator.CreatePlayerHealStaminaEffect(0, 0, 100);
+
             Item coifOfTesting = new Item();
             coifOfTesting.Name = "Coif of Testing";
             coifOfTesting.ItemType = ItemUseType.Equippable;
@@ -108,10 +111,41 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             itemMarker2.LocationDescription = "cleanly sitting on the ground";
             chunk.AddMapObject(itemMarker2);
 
+            Consumable staminaPotion = new Consumable();
+            staminaPotion.Name = "Stamina Surge Potion";
+            staminaPotion.ItemType = ItemUseType.Consumable;
+            staminaPotion.ActionVerb = "drink";
+            staminaPotion.Description = "A simple potion used to alleviate fatigue.";
+            staminaPotion.Category = ItemCategoryType.Potion;
+            staminaPotion.Noun = "potion";
+            staminaPotion.Effect = staminaHealEffect;
+
+            Effect removeTrees = EffectCreator.CreateDebugTreeDeleteEffect(10, 10, 100);
+
+            Consumable scrollOfTreeRemoval = new Consumable();
+            scrollOfTreeRemoval.Name = "Scroll of Tree Deletion";
+            scrollOfTreeRemoval.ItemType = ItemUseType.Consumable;
+            scrollOfTreeRemoval.ActionVerb = "cast";
+            scrollOfTreeRemoval.Description = "A powerful scroll passed down by the gods to cease the existing of nearby trees for 10 turns.";
+            scrollOfTreeRemoval.Category = ItemCategoryType.Scroll;
+            scrollOfTreeRemoval.Noun = "scroll";
+            scrollOfTreeRemoval.Effect = removeTrees;
+
             MapContainer chest = new MapContainer();
             for (int i = 0; i < 26; i++)
             {
-                chest.Container.AddItem(healthPotion.Clone());
+                if (i % 6 == 0)
+                {
+                    chest.Container.AddItem(scrollOfTreeRemoval.Clone());
+                }
+                else if (i % 3 == 0)
+                {
+                    chest.Container.AddItem(staminaPotion.Clone());
+                }
+                else
+                {
+                    chest.Container.AddItem(healthPotion.Clone());
+                }
             }
             chest.X = 1;
             chest.ContainerDescription = "Old Chest";
@@ -382,6 +416,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             //Restart the detailed view timer:
             detailedAreaViewTimer.Stop();
             detailedAreaViewTimer.Start();
+
+            //Update the map and any calculations it needs to do.
+            map.Update(GameState);
         }
 
     }

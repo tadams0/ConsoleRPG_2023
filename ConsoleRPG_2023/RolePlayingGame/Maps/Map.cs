@@ -1,6 +1,7 @@
 ﻿using ConsoleRPG_2023.Dependencies;
 using ConsoleRPG_2023.RolePlayingGame.Collections;
 using ConsoleRPG_2023.RolePlayingGame.Dungeons;
+using ConsoleRPG_2023.RolePlayingGame.Effects;
 using ConsoleRPG_2023.RolePlayingGame.Noise;
 using ConsoleRPG_2023.RolePlayingGame.Structs;
 using csDelaunay;
@@ -59,6 +60,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// </summary>
         protected Dictionary<long, Map> subMaps = new Dictionary<long, Map>();
 
+        private HashSet<MapObject> trackedObjects = new HashSet<MapObject>();
 
         public Map()
         {
@@ -169,6 +171,18 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         }
 
         /// <summary>
+        /// Gets map objects at the given x and y world position.
+        /// </summary>
+        /// <param name="x">The horizontal x-axis position.</param>
+        /// <param name="y">The vertical y-axis position.</param>
+        /// <returns>A newly generated list containing the references of any <see cref="MapObject"/> instance found at the given location.</returns>
+        public List<MapObject> GetObjects(long x, long y)
+        {
+            MapChunk chunk = GetChunkAtWorldSpace(x, y);
+            return chunk.GetAllObjectsAtWorldCoordinates(x, y);
+        }
+
+        /// <summary>
         /// Moves the given object by x on the x-axis, and y on the y-axis.
         /// </summary>
         /// <param name="obj">The object to move.</param>
@@ -264,6 +278,10 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             {
                 chunk.AddMapObject(obj.X, obj.Y, obj);
             }
+            if (obj.ActiveEffects.Count > 0)
+            {
+                AddTrackedObject(obj);
+            }
         }
 
         /// <summary>
@@ -276,6 +294,10 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             {
                 chunk.AddMapObject(x,y, obj);
             }
+            if (obj.ActiveEffects.Count > 0)
+            {
+                AddTrackedObject(obj);
+            }
         }
 
         public void RemoveObject(MapObject obj)
@@ -284,6 +306,76 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             if (chunk != null)
             {
                 chunk.RemoveMapObject(obj);
+            }
+            if (trackedObjects.Contains(obj))
+            {
+                trackedObjects.Remove(obj);
+            }
+        }
+
+        /// <summary>
+        /// Adds a tracked object which will be updated.
+        /// </summary>
+        public void AddTrackedObject(MapObject obj)
+        {
+            trackedObjects.Add(obj);
+        }
+
+        /// <summary>
+        /// Removes a tracked object.
+        /// </summary>
+        public void RemoveTrackedObject(MapObject obj)
+        { 
+            trackedObjects.Remove(obj); 
+        }
+
+        /// <summary>
+        /// Adds an active effect to the object using it as the trigger.
+        /// </summary>
+        public void AddActiveEffectToObject(GameState state, MapObject obj, Effect effect)
+        {
+            ActiveEffect e = new ActiveEffect(effect, obj);
+            obj.ActiveEffects.Add(e);
+            trackedObjects.Add(obj);
+
+            ApplyEffect(state, obj, e);
+        }
+
+        public void Update(GameState state)
+        {
+            //Manage any tracked object active effects.
+            foreach (var trackedObj in trackedObjects)
+            {
+                if (trackedObj.ActiveEffects.Count > 0)
+                {
+                    for (int j = trackedObj.ActiveEffects.Count - 1; j >= 0; j--)
+                    {
+                        ApplyEffect(state, trackedObj, trackedObj.ActiveEffects[j]);
+                    }
+                }
+
+                if (trackedObj.ActiveEffects.Count <= 0)
+                {//clean up tracked objects without active effects.
+                    trackedObjects.Remove(trackedObj);
+                }
+            }
+
+        }
+
+        protected void ApplyEffect(GameState state, MapObject trackedObj, ActiveEffect effect)
+        {
+            if (!effect.Initialized || effect.Effect.AlwaysRetarget)
+            {
+                effect.InitializeEffect(state, this, new PointL(trackedObj.X, trackedObj.Y));
+            }
+
+            //Apply the active effect.
+            effect.ApplyEffect(state, this);
+
+            //If the effect is finished, then let's remove it and clean it up.
+            if (effect.IsDone())
+            {
+                trackedObj.ActiveEffects.Remove(effect);
             }
         }
 

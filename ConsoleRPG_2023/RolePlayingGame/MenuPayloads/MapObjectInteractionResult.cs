@@ -11,7 +11,10 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps.MapObjects
     /// </summary>
     public class MapObjectInteractionResult
     {
-        public MapObject MapObject
+        /// <summary>
+        /// The object being interacted with.
+        /// </summary>
+        public MapObject InteractedMapObject
         {
             get { return mapObject; }
             set { mapObject = value; }

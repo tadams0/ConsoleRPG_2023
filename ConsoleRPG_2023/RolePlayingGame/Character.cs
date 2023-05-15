@@ -30,8 +30,12 @@ namespace ConsoleRPG_2023.RolePlayingGame
 
         public int Health { get; set; } = 100;
 
+        public int MinHealth { get; set; } = 0;
+
         public int MaxStamina { get; set; } = 100;
         public int Stamina { get; set; } = 100;
+
+        public int MinStamina { get; set; } = 0;
 
         public bool IsPlayer { get; }
 

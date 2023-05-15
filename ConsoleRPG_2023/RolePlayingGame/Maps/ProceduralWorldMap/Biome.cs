@@ -38,7 +38,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             objectInitSingleTileFunctions[priority] = function;
         }
 
-        public List<MapObject> GetSingleTileObjects(BiomeData data, Random rand, Tile tile)
+        public List<MapObject> GetSingleTileObjects(BiomeData data, Random rand, Tile tile, long x, long y)
         {
             List<MapObject> result = new List<MapObject>();
             MapObject currentObj = null;
@@ -47,6 +47,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                 currentObj = pair.Value(data, rand, tile);
                 if (currentObj != null)
                 {
+                    currentObj.X = x;
+                    currentObj.Y = y;
                     result.Add(currentObj);
                 }
             }
