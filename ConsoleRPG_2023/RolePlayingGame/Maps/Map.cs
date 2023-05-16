@@ -135,10 +135,30 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         }
 
         /// <summary>
+        /// Gets the chunk at the given <b>chunk/local</b> space. Which is independent of the chunk width/height.
+        /// </summary>
+        /// <param name="x">The chunk position on the x-axis. Where 0,0 denotes the first chunk. 1,0 the second chunk and so on.</param>
+        /// <param name="y">The chunk position on the y-axis. Where 0,0 denotes the first chunk. 0,1 the second chunk and so on.</param>
+        /// <returns>The chunk if it exists within the map. Otherwise null.</returns>
+        public virtual MapChunk GetChunkInChunkSpace(int x, int y)
+        {
+            long chunkId = GetChunkIdInChunkSpace(x, y);
+
+            bool chunkExists = mapChunkMapping.TryGetValue(chunkId, out var chunk);
+
+            if (!chunkExists)
+            {
+                return null;
+            }
+
+            return chunk;
+        }
+
+        /// <summary>
         /// Gets the chunk at the given <b>world</b> space. Which is dependent on the chunk width/height.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
+        /// <param name="x">The world position on the x-axis.</param>
+        /// <param name="y">The world position on the y-axis.</param>
         /// <returns>The chunk if it exists within the map. Otherwise null.</returns>
         public virtual MapChunk GetChunkAtWorldSpace(long x, long y)
         {
@@ -335,13 +355,45 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         public void AddActiveEffectToObject(GameState state, MapObject obj, Effect effect)
         {
             ActiveEffect e = new ActiveEffect(effect, obj);
-            obj.ActiveEffects.Add(e);
-            trackedObjects.Add(obj);
+            bool hasEffectAlready = obj.ActiveEffects.Any(x => x.Effect == effect);
+            if (!hasEffectAlready || effect.Stackable)
+            {
+                obj.ActiveEffects.Add(e);
+                trackedObjects.Add(obj);
 
-            ApplyEffect(state, obj, e);
+                ApplyEffect(state, obj, e);
+            }
         }
 
-        public void Update(GameState state)
+        /// <summary>
+        /// Applies an <see cref="ActiveEffect"/> on the given <see cref="MapObject"/> instance.
+        /// </summary>
+        /// <param name="state">The current game state.</param>
+        /// <param name="trackedObj">The object to recieve the effect.</param>
+        /// <param name="effect">The effect being applied.</param>
+        protected void ApplyEffect(GameState state, MapObject trackedObj, ActiveEffect effect)
+        {
+            if (!effect.TargetsRetrieved || effect.Effect.AlwaysRetarget)
+            {
+                effect.GetTargets(state, this, new PointL(trackedObj.X, trackedObj.Y));
+            }
+
+            //Apply the active effect.
+            effect.ApplyEffect(state, this);
+
+            //If the effect is finished, then let's remove it and clean it up.
+            if (effect.IsDone())
+            {
+                effect.OnRemoval(state, this);
+                trackedObj.ActiveEffects.Remove(effect);
+            }
+        }
+
+        /// <summary>
+        /// Updates all tracked objects and their effects.
+        /// </summary>
+        /// <param name="state">The current game state.</param>
+        private void UpdateTrackedObjects(GameState state)
         {
             //Manage any tracked object active effects.
             foreach (var trackedObj in trackedObjects)
@@ -359,24 +411,44 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                     trackedObjects.Remove(trackedObj);
                 }
             }
-
         }
 
-        protected void ApplyEffect(GameState state, MapObject trackedObj, ActiveEffect effect)
+        /// <summary>
+        /// Updates the map centered on the given world coordinates within the number of chunks specified.
+        /// </summary>
+        /// <param name="state">The current game state.</param>
+        /// <param name="worldX">The x-axis position to center the update on.</param>
+        /// <param name="worldY">The y-axis position to center the update on.</param>
+        /// <param name="verticalChunks">The number of chunks above and below the centered position to update.</param>
+        /// <param name="horizontalChunks">The number of chunks left and right of the centered position to update.</param>
+        public void Update(GameState state, long worldX, long worldY, int verticalChunks, int horizontalChunks)
         {
-            if (!effect.Initialized || effect.Effect.AlwaysRetarget)
-            {
-                effect.InitializeEffect(state, this, new PointL(trackedObj.X, trackedObj.Y));
+            Point topLeftChunk = GetLocalChunkXYFromWorldSpace(worldX - horizontalChunks * chunkWidth, worldY - verticalChunks * chunkHeight);
+            Point bottomRightChunk = GetLocalChunkXYFromWorldSpace(worldX + horizontalChunks * chunkWidth, worldY + verticalChunks * chunkHeight);
+
+            MapChunk currentChunk;
+            if (topLeftChunk == bottomRightChunk)
+            {//If there was only a single chunk selected.
+                currentChunk = GetChunkInChunkSpace(topLeftChunk.X, topLeftChunk.Y);
+                currentChunk.Update(state, this);
+            }
+            else
+            {//If there was a range of chunks selected, then we must loop through each and update them all.
+                for (int x = topLeftChunk.X; x <= bottomRightChunk.X; x++)
+                {
+                    for (int y = topLeftChunk.Y; y <= bottomRightChunk.Y; y++)
+                    {
+                        currentChunk = GetChunkInChunkSpace(x, y);
+                        if (currentChunk != null)
+                        {
+                            currentChunk.Update(state, this);
+                        }
+                    }
+                }
+
             }
 
-            //Apply the active effect.
-            effect.ApplyEffect(state, this);
-
-            //If the effect is finished, then let's remove it and clean it up.
-            if (effect.IsDone())
-            {
-                trackedObj.ActiveEffects.Remove(effect);
-            }
+            UpdateTrackedObjects(state);
         }
 
     }

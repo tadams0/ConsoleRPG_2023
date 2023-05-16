@@ -38,9 +38,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
         public PointL ActivateLocation { get; set; }
 
         /// <summary>
-        /// Gets whether the active effect has been initialized already.
+        /// Gets whether the active effect has already retrieved its targets at least one time.
         /// </summary>
-        public bool Initialized { get; protected set; }
+        public bool TargetsRetrieved { get; protected set; }
 
         /// <summary>
         /// Creates a new active effect instance for handling effect logic.
@@ -64,13 +64,30 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
         }
 
         /// <summary>
+        /// Method called when the active effect is being removed.
+        /// <br/>This method can be used for any clean up required.
+        /// </summary>
+        public virtual void OnRemoval(GameState state, Map map)
+        {
+            if (Effect.CleanupFunctionId >= 0)
+            {
+                var cleanupAction = EffectFunctionManager.GetAction(Effect.CleanupFunctionId);
+                cleanupAction(this, state, map);
+            }
+        }
+
+        /// <summary>
         /// Initializes the <see cref="ActiveEffect"/> for further application.
         /// </summary>
-        public void InitializeEffect(GameState state, Map map, PointL location)
+        public void GetTargets(GameState state, Map map, PointL location)
         {
             ActivateLocation = location;
-            var initAction = EffectFunctionManager.GetAction(Effect.InitializeFunctionId);
-            initAction(this, state, map);
+            if (Effect.TargetingFunctionId >= 0)
+            {
+                var targetAction = EffectFunctionManager.GetAction(Effect.TargetingFunctionId);
+                targetAction(this, state, map);
+            }
+            TargetsRetrieved = true;
         }
 
         /// <summary>
@@ -78,8 +95,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
         /// </summary>
         public void ApplyEffect(GameState state, Map map)
         {
-            var effectAction = EffectFunctionManager.GetAction(Effect.MainEffectFunctionId);
-            effectAction(this, state, map);
+            if (Effect.MainEffectFunctionId >= 0)
+            {
+                var effectAction = EffectFunctionManager.GetAction(Effect.MainEffectFunctionId);
+                effectAction(this, state, map);
+            }
             DurationCounter++;
         }
 

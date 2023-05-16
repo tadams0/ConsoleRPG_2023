@@ -1,10 +1,5 @@
-﻿using ConsoleRPG_2023.RolePlayingGame.Maps;
-using System;
+﻿
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleRPG_2023.RolePlayingGame.Effects
 {
@@ -26,9 +21,14 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
         public int Duration { get; set; } = 0;
 
         /// <summary>
-        /// The range in tiles of the effect. Negative values and 0 represent no range.
+        /// The range in tiles on the x-axis of the effect. Negative values and 0 represent no range.
         /// </summary>
-        public int Range { get; set; } = 0;
+        public int RangeX { get; set; } = 0;
+
+        /// <summary>
+        /// The range in tiles on the y-axis of the effect. Negative values and 0 represent no range.
+        /// </summary>
+        public int RangeY { get; set; } = 0;
 
         /// <summary>
         /// If true, then the initialization function of the effect will always trigger each time the effect is applied.
@@ -36,11 +36,29 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
         public bool AlwaysRetarget { get; set; } = true;
 
         /// <summary>
+        /// Gets or sets whether the effect is stackable. If true, then a map object can have more than one active.
+        /// </summary>
+        public bool Stackable { get; set; } = false;
+
+        /// <summary>
+        /// Text shown to users when examined either on themselves or on others.
+        /// </summary>
+        public string ExamineText { get; set; } = string.Empty;
+
+        /// <summary>
+        /// The list of sub effects tied to this effect.
+        /// </summary>
+        public List<Effect> SubEffects
+        {
+            get { return new List<Effect>(subEffects); }
+        }
+
+        /// <summary>
         /// The initialize function is used to generate the targets of the effect. It may target the player character for example.
         /// </summary>
-        public int InitializeFunctionId
+        public int TargetingFunctionId
         {
-            get { return initializeFunctionId; }
+            get { return targetingFunctionId; }
         }
 
         /// <summary>
@@ -51,31 +69,68 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
             get { return mainEffectFunctionId; }
         }
 
+        public int CleanupFunctionId
+        {
+            get { return cleanupFunctionId; }
+        }
+
         /// <summary>
-        /// The initialize function is used to generate the targets of the effect. It may target the player character for example.
+        /// The targeting function is used to generate the targets of the effect. It may target the player character for example.
         /// </summary>
-        protected int initializeFunctionId = -1;
+        protected int targetingFunctionId = -1;
 
         /// <summary>
         /// The main effect function is the actual logic the effect executes. It may be healing of character health for example.
         /// </summary>
         protected int mainEffectFunctionId = -1;
 
-        public Effect(int mainEffectFunctionId, int initializeFunctionId)
+        /// <summary>
+        /// The function run during the effect removal and cleanup. Negative numbers represent no function.
+        /// </summary>
+        protected int cleanupFunctionId = -1;
+
+        /// <summary>
+        /// Sub effects tied to the main effect function. Leave empty if no sub effects exist.
+        /// </summary>
+        protected List<Effect> subEffects = new List<Effect>();
+
+        public Effect(int mainEffectFunctionId, int targetingFunctionId, int cleanupFunctionId)
         {
             this.mainEffectFunctionId = mainEffectFunctionId;
-            this.initializeFunctionId = initializeFunctionId;
+            this.targetingFunctionId = targetingFunctionId;
+            this.cleanupFunctionId = cleanupFunctionId;
         }
 
-        public Effect(string mainEffectFunctionName, string initializeFunctionName)
+        public Effect(string mainEffectFunctionName, string targetingFunctionName, string cleanupFunctionName)
         {
             this.mainEffectFunctionId = EffectFunctionManager.GetActionId(mainEffectFunctionName);
-            this.initializeFunctionId = EffectFunctionManager.GetActionId(initializeFunctionName);
+
+            if (string.IsNullOrWhiteSpace(targetingFunctionName))
+            {
+                targetingFunctionId = -1;
+            }
+            else
+            {
+                this.targetingFunctionId = EffectFunctionManager.GetActionId(targetingFunctionName);
+            }
+
+            if (string.IsNullOrWhiteSpace(cleanupFunctionName))
+            {
+                cleanupFunctionId = -1;
+            }
+            else
+            {
+                this.cleanupFunctionId = EffectFunctionManager.GetActionId(cleanupFunctionName);
+            }
         }
 
-        public void SetInitializeFunction(string functionName)
+        /// <summary>
+        /// Adds a sub effect to this effect instance.
+        /// </summary>
+        /// <param name="effect">The sub effect to add.</param>
+        public void AddSubEffect(Effect effect)
         {
-            this.initializeFunctionId = EffectFunctionManager.GetActionId(functionName);
+            subEffects.Add(effect);
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using ConsoleRPG_2023.RolePlayingGame.Text;
+﻿using ConsoleRPG_2023.RolePlayingGame.Combat;
+using ConsoleRPG_2023.RolePlayingGame.Text;
 using CustomConsoleColors;
 using System;
 using System.Collections.Generic;
@@ -470,6 +471,22 @@ namespace ConsoleRPG_2023.RolePlayingGame
                 return text;
 
             return text[0].ToString().ToUpperInvariant() + text.Substring(1);
+        }
+
+        /// <summary>
+        /// Converts a damage type enum to a corresponding damage adjective.
+        /// </summary>
+        /// <param name="type">The type to convert.</param>
+        public static string DamageTypeToAdjective(DamageType type)
+        {
+            switch (type)
+            {
+                default:
+                case DamageType.None: return "none";
+                case DamageType.Fire: return "fire";
+                case DamageType.Poison: return "poisonous";
+                case DamageType.DirectHealth: return "draining";
+            }
         }
 
     }

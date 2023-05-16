@@ -88,7 +88,6 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
 
             chunk.AddMapObject(0, 0, dungeonMarker);
 
-            Effect staminaHealEffect = EffectCreator.CreatePlayerHealStaminaEffect(0, 0, 100);
 
             Item coifOfTesting = new Item();
             coifOfTesting.Name = "Coif of Testing";
@@ -100,25 +99,34 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             itemMarker1.LocationDescription = "within the mud on the ground";
             chunk.AddMapObject(itemMarker1);
 
+            List<Consumable> testConsumableList = new List<Consumable>();
+
+            Effect healthHealEffect = EffectCreator.CreatePlayerHealHealthEffect(0, 0, 50);
+
             Consumable healthPotion = new Consumable();
             healthPotion.Name = "Standard Healing Potion";
             healthPotion.ItemType = ItemUseType.Consumable;
             healthPotion.ActionVerb = "drink";
-            healthPotion.Description = "A simple healing potion.";
+            healthPotion.Description = "A simple healing potion. Heals 50 health.";
             healthPotion.Category = ItemCategoryType.Potion;
             healthPotion.Noun = "potion";
+            healthPotion.Effect = healthHealEffect;
             MapItem itemMarker2 = new MapItem(healthPotion);
             itemMarker2.LocationDescription = "cleanly sitting on the ground";
             chunk.AddMapObject(itemMarker2);
+            testConsumableList.Add(healthPotion);
+
+            Effect staminaHealEffect = EffectCreator.CreatePlayerHealStaminaEffect(0, 0, 100);
 
             Consumable staminaPotion = new Consumable();
             staminaPotion.Name = "Stamina Surge Potion";
             staminaPotion.ItemType = ItemUseType.Consumable;
             staminaPotion.ActionVerb = "drink";
-            staminaPotion.Description = "A simple potion used to alleviate fatigue.";
+            staminaPotion.Description = "A simple potion used to alleviate fatigue. Recovers 100 stamina.";
             staminaPotion.Category = ItemCategoryType.Potion;
             staminaPotion.Noun = "potion";
             staminaPotion.Effect = staminaHealEffect;
+            testConsumableList.Add(staminaPotion);
 
             Effect removeTrees = EffectCreator.CreateDebugTreeDeleteEffect(10, 10, 100);
 
@@ -130,22 +138,64 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             scrollOfTreeRemoval.Category = ItemCategoryType.Scroll;
             scrollOfTreeRemoval.Noun = "scroll";
             scrollOfTreeRemoval.Effect = removeTrees;
+            testConsumableList.Add(scrollOfTreeRemoval);
 
+            Effect poisonCloudEffect = EffectCreator.CreateDamageCloudEffect(3, 50, 1, 20, 10, Combat.DamageType.Poison);
+
+            Consumable scrollOfPoison = new Consumable();
+            scrollOfPoison.Name = "Plague Scroll";
+            scrollOfPoison.ItemType = ItemUseType.Consumable;
+            scrollOfPoison.ActionVerb = "cast";
+            scrollOfPoison.Description = "A scroll which summons numerous poison clouds to strike damage to nearby characters.";
+            scrollOfPoison.Category = ItemCategoryType.Scroll;
+            scrollOfPoison.Noun = "scroll";
+            scrollOfPoison.Effect = poisonCloudEffect;
+            testConsumableList.Add(scrollOfPoison);
+
+            Effect fireCloudEffect = EffectCreator.CreateDamageCloudEffect(3, 50, 1, 20, 10, Combat.DamageType.Fire);
+
+            Consumable scrollOfFire = new Consumable();
+            scrollOfFire.Name = "Lingering Fire Winds Scroll";
+            scrollOfFire.ItemType = ItemUseType.Consumable;
+            scrollOfFire.ActionVerb = "cast";
+            scrollOfFire.Description = "Scroll that spawns gusts of dangerous fire winds.";
+            scrollOfFire.Category = ItemCategoryType.Scroll;
+            scrollOfFire.Noun = "scroll";
+            scrollOfFire.Effect = fireCloudEffect;
+            testConsumableList.Add(scrollOfFire);
+
+            Effect frostCloudEffect = EffectCreator.CreateDamageCloudEffect(3, 50, 1, 20, 10, Combat.DamageType.Frost);
+
+            Consumable scrollOfBlizzard = new Consumable();
+            scrollOfBlizzard.Name = "Blizard Scroll";
+            scrollOfBlizzard.ItemType = ItemUseType.Consumable;
+            scrollOfBlizzard.ActionVerb = "cast";
+            scrollOfBlizzard.Description = "Scroll that generates a blizzard in a nearby area of the caster hurting anyone who enters.";
+            scrollOfBlizzard.Category = ItemCategoryType.Scroll;
+            scrollOfBlizzard.Noun = "scroll";
+            scrollOfBlizzard.Effect = frostCloudEffect;
+            testConsumableList.Add(scrollOfBlizzard);
+
+            Effect corruptionCloudEffect = EffectCreator.CreateDamageCloudEffect(3, 50, 1, 20, 10, Combat.DamageType.Corruption);
+
+            Consumable scrollOfCorruption = new Consumable();
+            scrollOfCorruption.Name = "Ancient Scroll of Demise";
+            scrollOfCorruption.ItemType = ItemUseType.Consumable;
+            scrollOfCorruption.ActionVerb = "cast";
+            scrollOfCorruption.Description = "A scroll capable of conjuring putrid clouds.";
+            scrollOfCorruption.Category = ItemCategoryType.Scroll;
+            scrollOfCorruption.Noun = "scroll";
+            scrollOfCorruption.Effect = corruptionCloudEffect;
+            testConsumableList.Add(scrollOfCorruption);
+
+            Random r = new Random();
             MapContainer chest = new MapContainer();
             for (int i = 0; i < 26; i++)
             {
-                if (i % 6 == 0)
-                {
-                    chest.Container.AddItem(scrollOfTreeRemoval.Clone());
-                }
-                else if (i % 3 == 0)
-                {
-                    chest.Container.AddItem(staminaPotion.Clone());
-                }
-                else
-                {
-                    chest.Container.AddItem(healthPotion.Clone());
-                }
+                //Add a random item to the container.
+                Item newItem = testConsumableList[r.Next(0, testConsumableList.Count)].Clone();
+
+                chest.Container.AddItem(newItem);
             }
             chest.X = 1;
             chest.ContainerDescription = "Old Chest";
@@ -310,6 +360,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
                 map.MoveObject(player, 0, -1);
                 OnPlayerAction();
                 OnPlayerMove();
+                UpdateMap();
             }
             else if (Helper.StringEquals(input.Text, "s")
                 || input.Key.Key == ConsoleKey.DownArrow)
@@ -317,6 +368,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
                 map.MoveObject(player, 0, 1);
                 OnPlayerAction();
                 OnPlayerMove();
+                UpdateMap();
             }
             else if (Helper.StringEquals(input.Text, "a")
                 || input.Key.Key == ConsoleKey.LeftArrow)
@@ -324,6 +376,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
                 map.MoveObject(player, -1, 0);
                 OnPlayerAction();
                 OnPlayerMove();
+                UpdateMap();
             }
             else if (Helper.StringEquals(input.Text, "d")
                 || input.Key.Key == ConsoleKey.RightArrow)
@@ -331,6 +384,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
                 map.MoveObject(player, 1, 0);
                 OnPlayerAction();
                 OnPlayerMove();
+                UpdateMap();
+            }
+            else if (input.Key.Key == ConsoleKey.Spacebar)
+            {//Spacebar acts as a map update key / empty action.
+                UpdateMap();
             }
             else if (input.Key.Key == ConsoleKey.E 
                 || input.Key.Key == ConsoleKey.I)
@@ -385,6 +443,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             //Ensure the player is not in the list of interactable objects.
             objects.Remove(player); 
 
+            if (index >= objects.Count)
+            {//Selected index is now out of bounds of the available objects to select.
+                return null;
+            }
+
             MapObject interactingObject = objects[index];
             if (interactingObject != null && interactingObject != player)
             {
@@ -403,7 +466,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
         /// </summary>
         private void OnPlayerAction()
         {
-            player.Stamina -= 1;
+            player.SetStamina(player.Stamina - 1);
         }
 
         /// <summary>
@@ -416,9 +479,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             //Restart the detailed view timer:
             detailedAreaViewTimer.Stop();
             detailedAreaViewTimer.Start();
+        }
 
+        private void UpdateMap()
+        {
             //Update the map and any calculations it needs to do.
-            map.Update(GameState);
+            map.Update(GameState, player.X, player.Y, 10, 20);
         }
 
     }

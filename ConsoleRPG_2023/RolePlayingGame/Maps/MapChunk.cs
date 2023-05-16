@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleRPG_2023.RolePlayingGame.Maps.MapObjects;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
@@ -60,6 +61,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         private Tile[] tiles;
 
         private Dictionary<byte, List<MapObject>> mapObjects = new Dictionary<byte, List<MapObject>>();
+
+        /// <summary>
+        /// A list containing the objects which need updates within the chunk.
+        /// </summary>
+        private HashSet<IUpdatable> updatables = new HashSet<IUpdatable>();
         
         /// <summary>
         /// A cache mapping for quickly discovering the location of an object within the chunk without knowing it's x and y.
@@ -131,6 +137,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                 mapObjects[objectId] = new List<MapObject>();
             }
 
+            AddUpdatable(obj);
             mapObjects[objectId].Add(obj);
             mapObjectToKey[obj] = objectId;
         }
@@ -156,6 +163,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             foreach (MapObject obj in objs)
             {
                 mapObjectToKey[obj] = objectId;
+                AddUpdatable(obj);
             }
         }
 
@@ -174,6 +182,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
                 mapObjects[objectId] = new List<MapObject>();
             }
 
+            AddUpdatable(obj);
             mapObjects[objectId].Add(obj);
             mapObjectToKey[obj] = objectId;
         }
@@ -188,6 +197,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             //if the object is in this chunk to begin with.
             if (mapObjectToKey.TryGetValue(obj, out byte value))
             {
+                RemoveUpdatable(obj);
                 mapObjectToKey.Remove(obj);
                 mapObjects[value].Remove(obj);
             }
@@ -206,13 +216,37 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             if (mapObjects.ContainsKey(squashedCoordinate))
             {
                 List<MapObject> objectsToRemove = mapObjects[squashedCoordinate];
-
                 foreach (MapObject obj in objectsToRemove)
                 {
+                    RemoveUpdatable(obj);
                     mapObjectToKey.Remove(obj);
                 }
 
                 mapObjects[squashedCoordinate].Clear();
+            }
+        }
+
+        /// <summary>
+        /// Removes the updatable instance if the given object is a tracked <see cref="IUpdatable"/>.
+        /// </summary>
+        private void RemoveUpdatable(MapObject obj)
+        {
+            IUpdatable updatable = obj as IUpdatable;
+            if (updatable != null)
+            {
+                updatables.Remove(updatable);
+            }
+        }
+
+        /// <summary>
+        /// Adds an updatable instance if the given object is an <see cref="IUpdatable"/>. If the given object is not an <see cref="IUpdatable"/> then nothing will happen.
+        /// </summary>
+        private void AddUpdatable(MapObject obj)
+        {
+            IUpdatable updatable = obj as IUpdatable;
+            if (updatable != null)
+            {
+                updatables.Add(updatable);
             }
         }
 
@@ -395,6 +429,18 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             return false;
         }
 
+        /// <summary>
+        /// Updates all <see cref="IUpdatable"/> instances held by this <see cref="MapChunk"/> instance.
+        /// </summary>
+        /// <param name="state">The general game state for use in any calculations.</param>
+        /// <param name="map">The map that the update is occuring on.</param>
+        public void Update(GameState state, Map map)
+        {
+            foreach (var updatable in updatables)
+            {
+                updatable.Update(state, map);
+            }
+        }
 
     }
 }
