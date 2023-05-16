@@ -544,6 +544,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             detailedAreaViewTimer.Start();
         }
 
+        /// <summary>
+        /// Forces a single update for the active map.
+        /// </summary>
         private void UpdateMap()
         {
             //Update the map and any calculations it needs to do.
@@ -565,6 +568,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             map.AddObject(player);
         }
 
+        /// <summary>
+        /// Adds the given map and its world x and y to the map stack.
+        /// </summary>
+        /// <param name="map"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
         private void AddToStack(Map map, long x, long y)
         {
             Pair<Map, PointL> newPair = new Pair<Map, PointL>(map, new PointL(x, y));
@@ -572,10 +581,18 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             mapStack.Add(newPair);
         }
 
+        /// <summary>
+        /// Returns the last instance on the map stack and removes it from the stack.
+        /// </summary>
         private Pair<Map, PointL> PopStack()
         {
-            var stackPair = mapStack.LastOrDefault();
-            return stackPair;
+            if (mapStack.Count > 0)
+            {
+                var stackPair = mapStack.Last();
+                mapStack.RemoveAt(mapStack.Count - 1);
+                return stackPair;
+            }
+            return null;
         }
 
     }
