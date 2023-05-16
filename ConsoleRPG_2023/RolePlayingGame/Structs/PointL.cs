@@ -8,6 +8,10 @@ namespace ConsoleRPG_2023.RolePlayingGame
     /// </summary>
     public struct PointL
     {
+        /// <summary>
+        /// Defines an empty <see cref="PointL"/> with the values X: 0, Y: 0.
+        /// </summary>
+        public static PointL Empty { get; } = new PointL(0, 0);
 
         public static double Distance(PointL v1, PointL v2)
         {

@@ -140,8 +140,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         private float magnitude = 7;
         #endregion
 
-        public ProceduralWorldMap(long seed)
-            : base(seed)
+        public ProceduralWorldMap(long id, long seed)
+            : base(id, seed)
         {
             moistureRange = maxMoisture - minMoisture;
             temperatureRange = maxTemperature - minTemperature;

@@ -26,6 +26,17 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         //Chunk space is relative to the chunks position in the world. So 0,0 is the first chunk. 0,1 is the second chunk. 0,2 is the third chunk. And so on.
         //Tile space is relative to a single chunk. So 0,0 is the first tile within a single chunk. 0,1 is the second tile in that same chunk. And so on.
 
+
+        /// <summary>
+        /// Gets or sets the id of the <see cref="Map"/> instance.
+        /// </summary>
+        public long Id { get; set; }
+        
+        /// <summary>
+        /// The name of the map.
+        /// </summary>
+        public string Name { get; set; } = "[Unnamed Map]";
+
         public int ChunkWidth
         {
             get { return chunkWidth; }
@@ -62,14 +73,16 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
         private HashSet<MapObject> trackedObjects = new HashSet<MapObject>();
 
-        public Map()
+        public Map(long id)
         {
             this.seed = new Random().Next(0, int.MaxValue);
+            Id = id;
         }
 
-        public Map(long seed)
+        public Map(long id, long seed)
         {
             this.seed = seed;
+            Id = id;
         }
 
         /// <summary>
@@ -121,6 +134,22 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             int localChunkY = (int)Math.Floor((decimal)y / chunkHeight);
 
             return GetChunkIdInChunkSpace(localChunkX, localChunkY);
+        }
+
+        /// <summary>
+        /// Gets the world position from the given local chunk XY and local position with that chunk.
+        /// </summary>
+        /// <param name="chunkX">The horizontal chunk on the x-axis. 0 is the first chunk, 1 is the second chunk, 2 is the third and so on.</param>
+        /// <param name="chunkY">The vertical chunk on the y-axis. 0 is the first chunk, 1 is the second chunk, 2 is the third and so on.</param>
+        /// <param name="localX">The local position within the specified chunk on the x axis.</param>
+        /// <param name="localY">The local position within the specified chunk on the y axis.</param>
+        /// <returns>The world position within the map.</returns>
+        public PointL GetWorldPositionFromChunkPosition(long chunkX, long chunkY, int localX, int localY)
+        {
+            long worldX = chunkX * chunkWidth + localX;
+            long worldY = chunkY * chunkHeight + localY;
+
+            return new PointL(worldX, worldY);
         }
 
         /// <summary>
@@ -257,20 +286,19 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
 
         /// <summary>
         /// Adds the given dungeon to the given x and y world coordinates in the map. 
-        /// <br/> This does not create <see cref="MapDungeonObj"/> instances or entrances to the given dungeon.
+        /// <br/> This does not create <see cref="MapEntranceObj"/> instances or entrances to the given dungeon.
         /// </summary>
-        /// <param name="newDungeon">The dungeon to add to the map.</param>
+        /// <param name="subMap">The map to add to the map.</param>
         /// <param name="x">The world x coordinate.</param>
         /// <param name="y">The world y coordinate.</param>
         /// <returns>The id of the dungeon.</returns>
-        public long AddDungeon(DungeonMap newDungeon, long x, long y)
+        public long AddSubMap(Map subMap, long x, long y)
         {
             long key = y * maximumNumberOfChunks + x;
-            subMaps[key] = newDungeon;
-            newDungeon.Id = key;
+            subMaps[key] = subMap;
+            subMap.Id = key;
             return key;
         }
-
 
         /// <summary>
         /// Retrieves a submap with the given id.
@@ -278,14 +306,6 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         public Map GetSubMap(long id)
         {
             return subMaps[id];
-        }
-
-        /// <summary>
-        /// Retrieves the dungeon with the given id.
-        /// </summary>
-        public DungeonMap GetDungeon(long id)
-        {
-            return (DungeonMap)subMaps[id];
         }
 
         /// <summary>

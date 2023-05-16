@@ -108,18 +108,6 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             }
         }
 
-        /*
-        public Tile GetTileAtWorldCoordinates(int x, int y)
-        {
-            //Must convert from world coordinates to local coordinates (0-width on x and 0-height on y).
-            //To do this, we need to subtract the x and y of this chunk which is in world coordinates.
-
-            int localX = x - X;
-            int localY = y - Y;
-            return GetTileRelativeCoordinates(localX, localY);
-        }
-        */
-
         /// <summary>
         /// Adds a map object to the chunk.
         /// </summary>
@@ -140,10 +128,13 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             AddUpdatable(obj);
             mapObjects[objectId].Add(obj);
             mapObjectToKey[obj] = objectId;
+
+            obj.X = x; 
+            obj.Y = y;
         }
 
         /// <summary>
-        /// Adds a map object to the chunk.
+        /// Adds one or more <see cref="MapObject"/> instances to the given x and y world position.
         /// </summary>
         /// <param name="x">The world x coordinate to place the object.</param>
         /// <param name="y">The world y coordinate to place the object.</param>
@@ -164,6 +155,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             {
                 mapObjectToKey[obj] = objectId;
                 AddUpdatable(obj);
+                obj.X = x;
+                obj.Y = y;
             }
         }
 
@@ -366,16 +359,16 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// <summary>
         /// Gets the first instance of a map dungeon located at the given x and y position.
         /// </summary>
-        public MapDungeonObj GetMapDungeonAtWorldCoordinates(long x, long y)
+        public MapEntranceObj GetMapDungeonAtWorldCoordinates(long x, long y)
         {
             byte tileId = GetTileIdFromWorldCoordinates(x, y);
             if (mapObjects.TryGetValue(tileId, out List<MapObject> objects))
             {
                 foreach (MapObject obj in objects)
                 {
-                    if (obj is MapDungeonObj)
+                    if (obj is MapEntranceObj)
                     {
-                        return (MapDungeonObj)obj;
+                        return (MapEntranceObj)obj;
                     }
                 }
             }

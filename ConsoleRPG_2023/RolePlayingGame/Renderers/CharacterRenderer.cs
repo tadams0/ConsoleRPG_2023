@@ -8,7 +8,7 @@ using System.Text;
 namespace ConsoleRPG_2023.RolePlayingGame.Renderers
 {
     /// <summary>
-    /// Defines a class speciallized to render characters.
+    /// A <see cref="MapObjectRenderer"/> specialized for rendering <see cref="Character"/> instances.
     /// </summary>
     public class CharacterRenderer : MapObjectRenderer
     {

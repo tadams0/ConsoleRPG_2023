@@ -17,6 +17,10 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
 {
     public class MapExploreMenu : Menu
     {
+        /// <summary>
+        /// A stack of maps in order of visitation.
+        /// </summary>
+        private List<Pair<Map, PointL>> mapStack = new List<Pair<Map, PointL>>();
 
         private HUD playerHud;
 
@@ -80,10 +84,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             chunk.AddMapObject(player);
 
             //TEST ONLY:
-            DungeonMap testDungeon = new DungeonMap(111, 111);
-            long id = map.AddDungeon(testDungeon, 0, 0);
+            PointL startPosition = new PointL(0, 0);
+            DungeonMap testDungeon = new DungeonMap(20, 20, startPosition.X, startPosition.Y);
+            testDungeon.CreateEntranceExitReturns(map.Name);
+            long id = map.AddSubMap(testDungeon, 0, 0);
 
-            MapDungeonObj dungeonMarker = new MapDungeonObj(id);
+            MapEntranceObj dungeonMarker = new MapEntranceObj(id, startPosition.X, startPosition.Y);
             dungeonMarker.Name = testDungeon.Name;
 
             chunk.AddMapObject(0, 0, dungeonMarker);
@@ -207,11 +213,65 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
         {
             base.OnSetPayload();
 
+            if (lastPayload == null)
+            {
+                return;
+            }
+
             //Handle payload data from callbacks from other menus.
-            ItemPickupResult itemPickupResult = (ItemPickupResult)lastPayload;
+            ItemPickupResult itemPickupResult = lastPayload as ItemPickupResult;
             if (itemPickupResult != null)
             {
-                //TODO: Handle stealing or whatever else needs doing. Container management is done within the menu.
+                //TODO: Handle stealing or whatever else needs doing. Container management is done within its own menu.
+            }
+
+            MapObjectInteractionResult mapInteractionResult = lastPayload as MapObjectInteractionResult;
+            if (mapInteractionResult != null)
+            {
+                MapReturnObj returnObj = mapInteractionResult.InteractedMapObject as MapReturnObj;
+                if (returnObj != null && mapStack.Count > 0)
+                {
+                    //Begin player exit logic as needed.
+                    OnPlayerExitMap();
+
+                    //Grab the last map location pair on the stack.
+                    var mapLocationPair = PopStack();
+
+                    //Get the new map
+                    map = mapLocationPair.Value1;
+
+                    //Set the renderer to use the new map.
+                    mapRenderer.Map = map;
+
+                    OnPlayerEnterMap(mapLocationPair.Value2.X, mapLocationPair.Value2.Y);
+
+                    //We're done so end.
+                    return;
+                }
+
+                //Now check if it was an entrance marker.
+                MapEntranceObj mapEntranceMarker = mapInteractionResult.InteractedMapObject as MapEntranceObj;
+                
+                if (mapEntranceMarker != null)
+                {
+                    //Add the current map to the stack
+                    AddToStack(map, player.X, player.Y);
+
+                    //Handle the actions needed for exiting the map.
+                    OnPlayerExitMap();
+
+                    //Get the new map
+                    map = mapInteractionResult.Map.GetSubMap(mapEntranceMarker.DungeonId);
+
+                    //Set the renderer to use the new map.
+                    mapRenderer.Map = map;
+
+                    //Now handle actions required for entering a new map.
+                    OnPlayerEnterMap(mapEntranceMarker.StartX, mapEntranceMarker.StartY);
+
+                    //We're done, so end.
+                    return;
+                }
             }
 
         }
@@ -223,12 +283,15 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
                 detailedAreaViewTimer.Stop();
             }
 
-            //Render the map here.
-            mapRenderer.Map = GameState.WorldMap; //Set the renderer to use the world map (just in case it's not for some reason).
+            //Ensure the map being rendered is the current one 
+            mapRenderer.Map = map;
+
+            //Begin the actual rendering.
             mapRenderer.DrawMapCenterOnCoordinates(player.X, player.Y);
-            var result = mapRenderer.GetConsoleSpaceFromWorldSpace(player.X, player.Y);
+
             if (debugMode)
             {
+                var result = mapRenderer.GetConsoleSpaceFromWorldSpace(player.X, player.Y);
                 Console.WriteLine($"Player console x: " + result.X + " y: " + result.Y);
             }
 
@@ -485,6 +548,34 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
         {
             //Update the map and any calculations it needs to do.
             map.Update(GameState, player.X, player.Y, 10, 20);
+        }
+
+
+        private void OnPlayerExitMap()
+        {
+            map.RemoveObject(player);
+
+        }
+
+        private void OnPlayerEnterMap(long startX, long startY)
+        {
+            player.X = startX;
+            player.Y = startY;
+
+            map.AddObject(player);
+        }
+
+        private void AddToStack(Map map, long x, long y)
+        {
+            Pair<Map, PointL> newPair = new Pair<Map, PointL>(map, new PointL(x, y));
+
+            mapStack.Add(newPair);
+        }
+
+        private Pair<Map, PointL> PopStack()
+        {
+            var stackPair = mapStack.LastOrDefault();
+            return stackPair;
         }
 
     }

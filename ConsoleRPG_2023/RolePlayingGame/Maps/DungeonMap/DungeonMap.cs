@@ -16,23 +16,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
     {
 
         /// <summary>
-        /// Gets or sets the id of the dungeon.
+        /// The starting point of the dungeon in world coordinates.
         /// </summary>
-        public long Id
+        public PointL StartPoint
         {
-            get { return dungeonId; }
-            set { dungeonId = value; }
-        }
-
-        public string Name
-        {
-            get { return dungeonName; }
-            set { dungeonName = value; }
-        }
-
-        public Point Entrance
-        {
-            get { return dungeonEntrance; }
+            get { return dungeonStart; }
         }
 
         private int brushThickness = 3;
@@ -45,15 +33,13 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
         private int maxChunksHorizontal;
         private int maxChunksVertical;
 
-        private long dungeonId;
-
-        private string dungeonName = "Unnamed Dungeon";
-
-        private Point dungeonEntrance;
+        private PointL dungeonStart = PointL.Empty;
+        private PointL dungeonEnd = PointL.Empty;
 
         private static Random rand = new Random(2);
 
-        public DungeonMap(int maxChunksHorizontal, int maxChunksVertical)
+        public DungeonMap(int maxChunksHorizontal, int maxChunksVertical, long startX, long startY)
+            : base(0)
         {
             //chunkWidth = 16;
             //chunkHeight = 16;
@@ -61,8 +47,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
             this.maxChunksVertical = maxChunksVertical;
 
             Name = "Test Dungeon";
-            Point entrance = new Point(0, 0);
-            this.SetEntrance(entrance);
+            this.SetEntrancePoint(startX, startY);
 
             GenerateMap();
         }
@@ -71,9 +56,28 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
         /// Sets the location where the player will be set when they enter the dungeon.
         /// </summary>
         /// <param name="entranceLocation">The x and y position relative to within the dungeon.</param>
-        public void SetEntrance(Point entranceLocation)
+        private void SetEntrancePoint(long startX, long startY)
         {
-            dungeonEntrance = entranceLocation;
+            dungeonStart = new PointL(startX, startY);
+        }
+
+        /// <summary>
+        /// Creates generic map return objects at the entrance and end points of the dungeon.
+        /// </summary>
+        public void CreateEntranceExitReturns(string returningMapName)
+        {
+            MapReturnObj entrance = new MapReturnObj();
+            entrance.X = dungeonStart.X;
+            entrance.Y = dungeonStart.Y;
+            entrance.ReturningMapName = $"Exit to {returningMapName}";
+
+            MapReturnObj exit = new MapReturnObj();
+            exit.X = dungeonEnd.X;
+            exit.Y = dungeonEnd.Y;
+            exit.ReturningMapName = $"Exit to {returningMapName}";
+
+            this.AddObject(entrance);
+            this.AddObject(exit);
         }
 
         private void GenerateMap()
@@ -90,21 +94,49 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
             int leftBias = 0;
             int upBias = 0;
 
-            GenerateBranch(0, 0, 0, 0, downBias, rightBias, leftBias, upBias, maxChunksHorizontal, maxChunksVertical, true);
+            //Transforming the provided world space coordinates to a valid local chunk space starting position.
+            Point chunkXY = GetLocalChunkXYFromWorldSpace(dungeonStart.X, dungeonStart.Y);
+            Point chunkSpace = GetLocalChunkSpaceFromWorldSpace(dungeonStart.X, dungeonStart.Y);
+
+            //Generating the actual dungeon map.
+            PointL endPoint = GenerateBranch(chunkXY.X, chunkXY.Y, chunkSpace.X, chunkSpace.Y, downBias, rightBias, leftBias, upBias, maxChunksHorizontal, maxChunksVertical, branchChance);
+            dungeonEnd = endPoint;
         }
 
-        private void GenerateBranch(int currentChunkX, int currentChunkY, int startX, int startY, int downBias, int rightBias, int leftBias, int upBias, int maxChunksHorizontal, int maxChunksVertical, bool allowFurtherBranches)
+        /// <summary>
+        /// Generates a branch with the given parameters.
+        /// </summary>
+        /// <param name="currentChunkX">The horizontal chunk to start the branch on.</param>
+        /// <param name="currentChunkY">The vertical chunk to start the branch on.</param>
+        /// <param name="startX">The local position on the x-axis within the specified chunk to start the branch at.</param>
+        /// <param name="startY">The local position on the y-axis within the specified chunk to start the branch at.</param>
+        /// <param name="downBias">The percent chance of a downward position being picked every movement.</param>
+        /// <param name="rightBias">The percent chance of a rightward position being picked every movement.</param>
+        /// <param name="leftBias">The percent chance of a leftward position being picked every movement.</param>
+        /// <param name="upBias">The percent chance of an upward position being picked every movement.</param>
+        /// <param name="maxChunksHorizontal">The maximum number horizontal chunks until the branch is forcefully ended</param>
+        /// <param name="maxChunksVertical">The maximum number vertical chunks until the branch is forcefully ended.</param>
+        /// <param name="branchChance">The chance of additional branches coming off the main generated one.</param>
+        /// <returns>The world position that the branch ends on.</returns>
+        private PointL GenerateBranch(int currentChunkX, int currentChunkY, int startX, int startY, int downBias, int rightBias, int leftBias, int upBias, int maxChunksHorizontal, int maxChunksVertical, int branchChance)
         {
             int originalChunkX = currentChunkX;
             int originalChunkY = currentChunkY;
             bool willExceedBounds = false;
 
             bool chunkExists = true;
+            Point previousEnd = Point.Empty;
+            int previousChunkX = 0;
+            int previousChunkY = 0;
+            Point end = Point.Empty;
 
             while (!willExceedBounds)
             {
+                previousEnd = end;
+                previousChunkX = currentChunkX;
+                previousChunkY = currentChunkY;
+
                 long chunkId = GetChunkIdInChunkSpace(currentChunkX, currentChunkY);
-                Point end;
                 MapChunk chunk;
 
                 chunkExists = mapChunkMapping.ContainsKey(chunkId);
@@ -149,7 +181,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
                 willExceedBounds = Math.Abs(currentChunkX - originalChunkX) + 1 > maxChunksHorizontal
                     || Math.Abs(currentChunkY - originalChunkY) + 1 > maxChunksVertical;
 
-                if (!willExceedBounds && allowFurtherBranches)
+                if (!willExceedBounds && branchChance > 0)
                 {
                     //Check if we should make a new branch
                     if (rand.Next(1, 101) < branchChance)
@@ -175,11 +207,15 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
                             branchDownBias = leftBias;
                         }
 
-                        //Recursion
-                        this.GenerateBranch(currentChunkX, currentChunkY, startX,startY, branchDownBias, branchRightBias, branchLeftBias, branchUpBias, maxBranchChunks, maxBranchChunks, false);
+                        //Recursion to generate off-shoot branches.
+                        //These cannot spawn additional branches by default as that could result in longer and uncontrolled maps.
+                        this.GenerateBranch(currentChunkX, currentChunkY, startX,startY, branchDownBias, branchRightBias, branchLeftBias, branchUpBias, maxBranchChunks, maxBranchChunks, 0);
                     }
                 }
             }
+
+            //We use the previous end to generate the last world position, because "end" should represent the out of bounds end that caused the branch to stop generating.
+            return GetWorldPositionFromChunkPosition(previousChunkX, previousChunkY, previousEnd.X, previousEnd.Y);
         }
 
         private void FillChunk(MapChunk chunk, int startingX, int startingY, int downBias, int upBias, int rightBias, int leftBias, out Point end)
@@ -259,7 +295,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
             }
         }
 
-        public static Point ChooseDirection(double north, double east, double south, double west)
+        private static Point ChooseDirection(double north, double east, double south, double west)
         {
             var directions = new List<KeyValuePair<Point, double>>()
             {
@@ -299,24 +335,6 @@ namespace ConsoleRPG_2023.RolePlayingGame.Dungeons
             Tile t = new Tile();
             t.TileType = TileType.Stone;
             return t;
-        }
-
-        private int Wrap(int min, int max, int x)
-        {
-            if (x < 0)
-            {
-                return max + x;
-            }
-            if (x < min)
-            {
-                return min + x % (max - min);
-            }
-            else if (x > max)
-            {
-                return min + x % (max - min);
-            }
-
-            return x;
         }
 
     }

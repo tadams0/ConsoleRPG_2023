@@ -10,17 +10,17 @@ using System.Text;
 namespace ConsoleRPG_2023.RolePlayingGame.Renderers
 {
     /// <summary>
-    /// Defines a class speciallized to render characters.
+    /// Defines a class speciallized to render <see cref="MapEntranceObj"/> instances.
     /// </summary>
-    public class DungeonObjRenderer : MapObjectRenderer
+    public class MapEntranceRenderer : MapObjectRenderer
     {
         public static readonly string defaultDisplayChar = "D";
 
         private static readonly Color defaultColor = Color.Black;
 
-        public DungeonObjRenderer() 
+        public MapEntranceRenderer() 
         {
-            renderedType = typeof(MapDungeonObj);
+            renderedType = typeof(MapEntranceObj);
         }
 
         public override string GetDisplayCharacter(MapObject obj, Tile tile, GameState state)

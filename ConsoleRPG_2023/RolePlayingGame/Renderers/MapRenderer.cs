@@ -284,7 +284,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Renderers
         {
             if (obj is Character)
                 return 1;
-            else if (obj is MapDungeonObj)
+            else if (obj is MapEntranceObj)
                 return 2;
             else if (obj is MapContainer)
                 return 3;

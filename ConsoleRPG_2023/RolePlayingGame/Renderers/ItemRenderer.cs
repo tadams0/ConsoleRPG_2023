@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace ConsoleRPG_2023.RolePlayingGame.Renderers
 {
+    /// <summary>
+    /// A <see cref="MapObjectRenderer"/> specialized for rendering <see cref="MapItem"/> instances.
+    /// </summary>
     public class ItemRenderer : MapObjectRenderer
     {
         private static string defaultDisplayChar = "i";

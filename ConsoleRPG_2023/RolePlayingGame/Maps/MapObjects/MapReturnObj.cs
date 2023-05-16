@@ -7,28 +7,22 @@ using System.Threading.Tasks;
 
 namespace ConsoleRPG_2023.RolePlayingGame.Maps
 {
-    public class MapDungeonObj : MapObject
+    /// <summary>
+    /// Defines a map object that triggers a return to the directly previous map on the <see cref="ConsoleRPG_2023.RolePlayingGame.Menus.MapExploreMenu"/> stack.
+    /// </summary>
+    public class MapReturnObj : MapObject
     {
-        public string Name
+        public string ReturningMapName
         {
             get { return name; }
             set { name = value; }
         }
 
-        /// <summary>
-        /// The id of the dungeon this map dungeon is tied to.
-        /// </summary>
-        public long DungeonId
-        {
-            get { return dungeonId; }
-        }
-
-        private string name = "Test Dungeon Entrance";
+        private string name = "[Unnamed Map Return Obj]";
         private long dungeonId = 0;
 
-        public MapDungeonObj(long dungeonId)
+        public MapReturnObj()
         {
-            this.dungeonId = dungeonId;
         }
 
         public override MapObjectInteractionResult Interact(Map map, Character character)
@@ -36,7 +30,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
             var result = base.Interact(map, character);
             
             //Navigate over to the dungeon explore menu.
-            result.Action = "DungeonExploreMenu";
+            result.Action = "MapExploreMenu";
             result.InteractionMessage = string.Empty;
 
             return result;
