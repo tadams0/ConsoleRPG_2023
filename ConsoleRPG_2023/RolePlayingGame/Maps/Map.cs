@@ -228,7 +228,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         public List<MapObject> GetObjects(long x, long y)
         {
             MapChunk chunk = GetChunkAtWorldSpace(x, y);
-            return chunk.GetAllObjectsAtWorldCoordinates(x, y);
+            var returnList = chunk.GetAllObjectsAtWorldCoordinates(x, y);
+
+            if (returnList == null)
+                return new List<MapObject>();
+
+            return returnList;
         }
 
         /// <summary>
@@ -356,7 +361,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Maps
         /// <summary>
         /// Adds a tracked object which will be updated.
         /// </summary>
-        public void AddTrackedObject(MapObject obj)
+        private void AddTrackedObject(MapObject obj)
         {
             trackedObjects.Add(obj);
         }

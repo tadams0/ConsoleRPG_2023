@@ -146,7 +146,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             scrollOfTreeRemoval.Effect = removeTrees;
             testConsumableList.Add(scrollOfTreeRemoval);
 
-            Effect poisonCloudEffect = EffectCreator.CreateDamageCloudEffect(3, 50, 1, 20, 10, Combat.DamageType.Poison);
+            Effect poisonCloudEffect = EffectCreator.CreateDamageCloudEffect(3, 50,4, 1, 20, 10, Combat.DamageType.Poison);
 
             Consumable scrollOfPoison = new Consumable();
             scrollOfPoison.Name = "Plague Scroll";
@@ -158,7 +158,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             scrollOfPoison.Effect = poisonCloudEffect;
             testConsumableList.Add(scrollOfPoison);
 
-            Effect fireCloudEffect = EffectCreator.CreateDamageCloudEffect(3, 50, 1, 20, 10, Combat.DamageType.Fire);
+            Effect fireCloudEffect = EffectCreator.CreateDamageCloudEffect(3, 50, 4, 1, 20, 10, Combat.DamageType.Fire);
 
             Consumable scrollOfFire = new Consumable();
             scrollOfFire.Name = "Lingering Fire Winds Scroll";
@@ -170,7 +170,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             scrollOfFire.Effect = fireCloudEffect;
             testConsumableList.Add(scrollOfFire);
 
-            Effect frostCloudEffect = EffectCreator.CreateDamageCloudEffect(3, 50, 1, 20, 10, Combat.DamageType.Frost);
+            Effect frostCloudEffect = EffectCreator.CreateDamageCloudEffect(3, 50, 4, 1, 20, 10, Combat.DamageType.Frost);
 
             Consumable scrollOfBlizzard = new Consumable();
             scrollOfBlizzard.Name = "Blizard Scroll";
@@ -182,7 +182,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             scrollOfBlizzard.Effect = frostCloudEffect;
             testConsumableList.Add(scrollOfBlizzard);
 
-            Effect corruptionCloudEffect = EffectCreator.CreateDamageCloudEffect(3, 50, 1, 20, 10, Combat.DamageType.Corruption);
+            Effect corruptionCloudEffect = EffectCreator.CreateDamageCloudEffect(3, 50, 4, 1, 20, 10, Combat.DamageType.Corruption);
 
             Consumable scrollOfCorruption = new Consumable();
             scrollOfCorruption.Name = "Ancient Scroll of Demise";
@@ -193,6 +193,18 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
             scrollOfCorruption.Noun = "scroll";
             scrollOfCorruption.Effect = corruptionCloudEffect;
             testConsumableList.Add(scrollOfCorruption);
+
+            Effect conjureHotSpringEffect = EffectCreator.CreateConjureHotSpringEffect();
+
+            Consumable scrollOfSteam = new Consumable();
+            scrollOfSteam.Name = "Conjure Hot Spring";
+            scrollOfSteam.ItemType = ItemUseType.Consumable;
+            scrollOfSteam.ActionVerb = "cast";
+            scrollOfSteam.Description = "Conjures a permanent hotspring on location.";
+            scrollOfSteam.Category = ItemCategoryType.Scroll;
+            scrollOfSteam.Noun = "scroll";
+            scrollOfSteam.Effect = conjureHotSpringEffect;
+            testConsumableList.Add(scrollOfSteam);
 
             Random r = new Random();
             MapContainer chest = new MapContainer();
@@ -339,17 +351,20 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
                 MapChunk chunk = map.GetChunkAtWorldSpace(player.X, player.Y);
                 List<MapObject> objects = chunk.GetAllObjectsAtWorldCoordinates(player.X, player.Y);
                 
-                //Remove the player from the list.
-                objects.Remove(player);
-
-                MapObject currentObj;
-                for (int i = 0; i < objects.Count; i++)
+                if (objects != null)
                 {
-                    currentObj = objects[i];
-                    Console.WriteLine($"{i + 1}) {currentObj.ToString()}");
-                }
+                    //Remove the player from the list.
+                    objects.Remove(player);
 
-                objectCount = objects.Count;
+                    MapObject currentObj;
+                    for (int i = 0; i < objects.Count; i++)
+                    {
+                        currentObj = objects[i];
+                        Console.WriteLine($"{i + 1}) {currentObj.ToString()}");
+                    }
+
+                    objectCount = objects.Count;
+                }
             }
 
         }
@@ -406,7 +421,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
 
             result.Action = Helper.ActionNone;
 
-            result.CustomMessage = $"INPUT: Cancelled? {input.Canceled} Value: {input.Text}";
+            //result.CustomMessage = $"INPUT: Cancelled? {input.Canceled} Value: {input.Text}";
 
             if (input.Canceled)
             {//If the input was cancelled, then we can swap to detailed mode.
@@ -502,6 +517,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Menus
         {
             MapChunk chunk = map.GetChunkAtWorldSpace(player.X, player.Y);
             List<MapObject> objects = chunk.GetAllObjectsAtWorldCoordinates(player.X, player.Y);
+
+            if (objects == null)
+                return null;
 
             //Ensure the player is not in the list of interactable objects.
             objects.Remove(player); 

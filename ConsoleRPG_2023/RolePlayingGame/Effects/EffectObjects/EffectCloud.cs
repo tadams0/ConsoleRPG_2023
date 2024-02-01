@@ -25,6 +25,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects.EffectObjects
         /// </summary>
         public Effect SpawningEffect { get; set; }
 
+        /// <summary>
+        /// The name of the effect cloud which will override any auto generated ones.
+        /// <br/>Leave as an empty string or null if you want to use the auto generated name.
+        /// </summary>
+        public string OverrideName { get; set; } = string.Empty;
+
         public EffectCloud(int maxLifeTime, List<Effect> appliedEffects, long x, long y)
         {
             this.X = x;
@@ -61,6 +67,11 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects.EffectObjects
 
         public override string ToString()
         {
+            if (!string.IsNullOrEmpty(OverrideName))
+            {
+                return OverrideName;
+            }
+
             if (AppliedEffects.Count == 1)
             {
                 Effect firstEffect = AppliedEffects[0];

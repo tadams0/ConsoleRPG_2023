@@ -479,6 +479,7 @@ namespace ConsoleRPG_2023.RolePlayingGame
         /// <param name="type">The type to convert.</param>
         public static string DamageTypeToAdjective(DamageType type)
         {
+            //TODO: Swap to a mapping at some point.
             switch (type)
             {
                 default:
@@ -486,6 +487,7 @@ namespace ConsoleRPG_2023.RolePlayingGame
                 case DamageType.Fire: return "fire";
                 case DamageType.Poison: return "poisonous";
                 case DamageType.DirectHealth: return "draining";
+                case DamageType.Steam: return "steam";
             }
         }
 

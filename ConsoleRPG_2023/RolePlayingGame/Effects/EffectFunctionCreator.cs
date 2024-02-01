@@ -1,6 +1,7 @@
 ﻿using ConsoleRPG_2023.RolePlayingGame.Combat;
 using ConsoleRPG_2023.RolePlayingGame.Effects.EffectObjects;
 using ConsoleRPG_2023.RolePlayingGame.Maps;
+using ConsoleRPG_2023.RolePlayingGame.Maps.MapObjects;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -24,6 +25,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
             EffectFunctionManager.AddAction(EffectCloudEffect, "EFFECT_CLOUD");
             EffectFunctionManager.AddAction(MapRemoval, "MAP_REMOVAL");
             EffectFunctionManager.AddAction(ApplyDamageEffect, "APPLY_DAMAGE");
+            EffectFunctionManager.AddAction(CreateHotSpring, "CREATE_HOTSPRING");
 
             //Targeting
             EffectFunctionManager.AddAction(TargetNearbyCharacters, "TARGET_NEARBY_CHARACTERS");
@@ -31,6 +33,48 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
             EffectFunctionManager.AddAction(TargetNearbyTrees, "TARGET_NEARBY_TREES");
             EffectFunctionManager.AddAction(TargetCharactersInActivationTile, "TARGET_CHARACTERS_ON_TILE");
             EffectFunctionManager.AddAction(TargetTrigger, "TARGET_TRIGGER");
+        }
+
+        /// <summary>
+        /// Defines a basic action for removing all targets from the map.
+        /// </summary>
+        public static void CreateHotSpring(ActiveEffect activeEffect, GameState state, Map map)
+        {
+            MapObject trigger = activeEffect.Trigger as MapObject;
+            if (activeEffect.Targets.Count == 0 && trigger != null)
+            {
+                //Use trigger
+                HotSpring hs = MapObjectFactory.CreateHotSpring();
+                hs.X = trigger.X;
+                hs.Y = trigger.Y;
+                map.AddObject(hs);
+            }
+            else if (activeEffect.Targets.Count == 0)
+            {
+                //Spawn a hotspring at activation location.
+                HotSpring hs = MapObjectFactory.CreateHotSpring();
+                hs.X = activeEffect.ActivateLocation.X;
+                hs.Y = activeEffect.ActivateLocation.Y;
+                map.AddObject(hs);
+            }
+            else
+            {
+                //Spawn a hotspring at every target.
+                foreach (var target in activeEffect.Targets)
+                {
+                    MapObject mapObject = target as MapObject;
+                    if (mapObject != null)
+                    {
+                        HotSpring hs = MapObjectFactory.CreateHotSpring();
+
+                        hs.X = mapObject.X;
+                        hs.Y = mapObject.Y;
+
+                        map.AddObject(hs);
+                    }
+                }
+            }
+
         }
 
         /// <summary>
@@ -143,9 +187,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
             Character character = null;
             int radiusX = activeEffect.Effect.RangeX;
             int radiusY = activeEffect.Effect.RangeY;
-            for (int i = -radiusX; i < radiusX; i++)
+            for (int i = -radiusX; i <= radiusX; i++)
             {
-                for (int j = -radiusY; j < radiusY; j++)
+                for (int j = -radiusY; j <= radiusY; j++)
                 {
                     long x = i + activeEffect.ActivateLocation.X;
                     long y = j + activeEffect.ActivateLocation.Y;
@@ -174,9 +218,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
             MapTree tree = null;
             int radiusX = activeEffect.Effect.RangeX;
             int radiusY = activeEffect.Effect.RangeY;
-            for (int i = -radiusX; i < radiusX; i++)
+            for (int i = -radiusX; i <= radiusX; i++)
             {
-                for (int j = -radiusY; j < radiusY; j++)
+                for (int j = -radiusY; j <= radiusY; j++)
                 {
                     long x = i + activeEffect.ActivateLocation.X;
                     long y = j + activeEffect.ActivateLocation.Y;
@@ -264,9 +308,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
             {
                 PointL centerPoint = new PointL(location.X, location.Y);
 
-                for (int i = -radiusX; i < radiusX; i++)
+                for (int i = -radiusX; i <= radiusX; i++)
                 {
-                    for (int j = -radiusY; j < radiusY; j++)
+                    for (int j = -radiusY; j <= radiusY; j++)
                     {
                         long x = i + centerPoint.X;
                         long y = j + centerPoint.Y;

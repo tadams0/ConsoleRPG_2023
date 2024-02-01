@@ -14,6 +14,17 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
     public static class EffectCreator
     {
 
+        public static Effect CreateAnyCharacterOnTileHealStaminaEffect(int range, int duration, int magnitude)
+        {
+            Effect e = new Effect("HEAL_STAMINA", "TARGET_CHARACTERS_ON_TILE", "");
+            e.RangeX = range;
+            e.RangeY = range;
+            e.Duration = duration;
+            e.Magnitude = magnitude;
+
+            return e;
+        }
+
         public static Effect CreatePlayerHealStaminaEffect(int range, int duration, int magnitude)
         {
             Effect e = new Effect("HEAL_STAMINA", "TARGET_PLAYER", "");
@@ -47,7 +58,7 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
             return e;
         }
 
-        public static Effect CreateDamageCloudEffect(int range, int cloudSpawningDuration, int damageDuration, double cloudSpawnChance, double damageAmountPerTurn, DamageType type)
+        public static Effect CreateDamageCloudEffect(int range, int cloudSpawningDuration, int cloudLifetime, int damageDuration, double cloudSpawnChance, double damageAmountPerTurn, DamageType type)
         {
             DamageEffect damageEffect = new DamageEffect("APPLY_DAMAGE", "TARGET_CHARACTERS_ON_TILE", "");
             damageEffect.Magnitude = damageAmountPerTurn;
@@ -62,11 +73,34 @@ namespace ConsoleRPG_2023.RolePlayingGame.Effects
             e.Duration = cloudSpawningDuration;
             e.Magnitude = cloudSpawnChance;
             e.AddSubEffect(damageEffect);
-            e.AddMagnitude(4); //The timer for how long the clouds stick around.
+            e.AddMagnitude(cloudLifetime); //The timer for how long the clouds stick around.
 
             return e;
         }
 
+        public static Effect CreateHotSpringStaminaCloudEffect(int steamRange, int steamSpawningDuration, int steamLifetime, int staminaHealDuration, double steamSpawnChance, int staminaHealPerTurn)
+        {
+            Effect staminaHealEffect = CreateAnyCharacterOnTileHealStaminaEffect(1, staminaHealDuration, staminaHealPerTurn);
+
+            MultiMagnitudeEffect e = new MultiMagnitudeEffect("EFFECT_CLOUD", "", "");
+            e.AlwaysRetarget = false;
+            e.Stackable = true;
+            e.RangeX = steamRange;
+            e.RangeY = steamRange;
+            e.Duration = steamSpawningDuration;
+            e.Magnitude = steamSpawnChance;
+            e.AddSubEffect(staminaHealEffect);
+            e.AddMagnitude(steamLifetime); //The timer for how long the clouds stick around.
+
+            return e;
+        }
+
+        public static Effect CreateConjureHotSpringEffect()
+        {
+            Effect e = new Effect("CREATE_HOTSPRING", "TARGET_TRIGGER", "");
+
+            return e;
+        }
 
     }
 }

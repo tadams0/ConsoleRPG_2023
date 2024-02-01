@@ -18,5 +18,6 @@ namespace ConsoleRPG_2023.RolePlayingGame.Combat
         Fire = 12,
         Corruption = 13,
         Frost = 14,
+        Steam = 15,
     }
 }

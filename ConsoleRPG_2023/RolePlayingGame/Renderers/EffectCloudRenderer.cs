@@ -68,6 +68,8 @@ namespace ConsoleRPG_2023.RolePlayingGame.Renderers
                 Color.FromArgb(242, 255, 255)
             };
 
+            cloudColorsByDamageType[DamageType.Steam] = defaultCloudColors;
+
             cloudColorsByDamageType[DamageType.None] = defaultCloudColors;
         }
 
