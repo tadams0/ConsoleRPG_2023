@@ -12,12 +12,12 @@ namespace ConsoleRPG_2023.RolePlayingGame.Renderers
     /// </summary>
     public class CharacterRenderer : MapObjectRenderer
     {
-        public static readonly string playerDisplayChar = "☻";
-        public static readonly string characterDisplayChar = "☺";
+        public static readonly string playerDisplayChar = "P";
+        public static readonly string characterDisplayChar = "C";
 
         private static readonly ConsoleColor defaultCharacterColor = ConsoleColor.Gray;
 
-        public CharacterRenderer() 
+        public CharacterRenderer()
         {
             renderedType = typeof(Character);
         }

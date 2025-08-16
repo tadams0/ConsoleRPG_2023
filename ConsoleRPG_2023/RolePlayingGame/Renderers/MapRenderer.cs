@@ -160,9 +160,9 @@ namespace ConsoleRPG_2023.RolePlayingGame.Renderers
             }
 
             long leftViewSide = x - ViewWidth / 2;
-            long rightViewSide = x + ViewWidth / 2;
+            long rightViewSide = leftViewSide + ViewWidth;
             long topViewSide = y - ViewHeight / 2;
-            long bottomViewSide = y + ViewHeight / 2;
+            long bottomViewSide = topViewSide + ViewHeight;
 
             return new RenderView(leftViewSide, rightViewSide, topViewSide, bottomViewSide);
         }
